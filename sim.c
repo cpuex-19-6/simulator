@@ -269,14 +269,14 @@ void exec_instr(uint32_t instr, CPU *cpu, MEMORY *mem){
 		case OP_JAL: {
 			int32_t rd = (int32_t)downto(instr, 11, 7);
 			int32_t imm = immediate(instr, J);
-			if(rd != 0)cpu->x[rd] = cpu->pc + 2;
+			if(rd != 0)cpu->x[rd] = cpu->pc + 4;
 			cpu->pc += imm;
 			break;}
 		case OP_JALR: {
 			int32_t rd = (int32_t)downto(instr, 11, 7);
 			int32_t rs1 = (int32_t)downto(instr, 19, 15);
 			int32_t imm = immediate(instr, I);
-			if(rd != 0)cpu->x[rd] = cpu->pc + 2;
+			if(rd != 0)cpu->x[rd] = cpu->pc + 4;
 			cpu->pc = cpu->x[rs1] + imm;
 			break;}
 		case OP_CB: 
