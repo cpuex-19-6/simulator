@@ -28,11 +28,13 @@ void mem_set(MEMORY *mem, OPTION option){
 		}
 	}
 
-	if(option.ftype_data == BIN){
-		load_data(mem, option.fname_data);
-	}
-	else{ //TXT
-		load_data_txt(mem, option.fname_data);
+	if(option.fname_data != NULL){
+		if(option.ftype_data == BIN){
+			load_data(mem, option.fname_data);
+		}
+		else{ //TXT
+			load_data_txt(mem, option.fname_data);
+		}
 	}
 }
 
@@ -44,7 +46,7 @@ void mem_free(MEMORY *mem){
 void load_instr(MEMORY *mem, char *filename){
 	FILE *fp;
 	if ((fp = fopen(filename, "rb")) == NULL){
-		perror("failed to open file");
+		perror("failed to open file: bin");
 		exit(EXIT_FAILURE);
 	}	
 	int n = 0;
@@ -62,7 +64,7 @@ void load_instr(MEMORY *mem, char *filename){
 void load_instr_txt(MEMORY *mem, char *filename){
 	FILE *fp;
 	if((fp = fopen(filename, "r")) == NULL){
-		perror("failed to open file");
+		perror("failed to open file: txt");
 		exit(EXIT_FAILURE);
 	}
 	

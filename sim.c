@@ -7,14 +7,7 @@
 #include "instruction.h"
 #include "cpu.h"
 #include "memory.h"
-
-typedef enum imm_t {
-	I,
-	S,
-	B,
-	U,
-	J,
-} IMM_TYPE;
+#include "disassemble.h"
 
 uint32_t downto(uint32_t u, int n, int m){
 	uint32_t ans = (u << (31-n)) >> (31- n + m);
@@ -22,7 +15,7 @@ uint32_t downto(uint32_t u, int n, int m){
 }
 
 //即値生成　無駄が多いが、仕様書と見た目が同じになるように
-int32_t immediate(uint32_t instr, IMM_TYPE ip){
+int32_t immediate(uint32_t instr, INSTR_TYPE ip){
 	uint32_t im31 = downto(instr, 31, 31);
 	uint32_t im30_25 = downto(instr, 30, 25);
 	uint32_t im30_20 = downto(instr, 30, 20);
@@ -283,6 +276,9 @@ void exec_instr(uint32_t instr, CPU *cpu, MEMORY *mem){
 			exec_CB(instr, cpu, mem);
 			break;
 		default: 
+			putchar('\n');
+			printf(" 0b");
+			print_binary(instr);
 			perror("unkown instruction");
 			exit(EXIT_FAILURE);
 	}	
@@ -295,4 +291,30 @@ uint32_t fetch(CPU *cpu, MEMORY *mem){
 	next_instr = mem->instr[addr_instr];
 
 	return next_instr;
+}
+
+void run_to_the_end(CPU *cpu, MEMORY *mem){
+	uint32_t instr = fetch(cpu, mem);
+	
+	while(instr != 0){
+		exec_instr(instr, cpu, mem);
+		instr = fetch(cpu, mem);
+	}
+}
+
+void step(CPU *cpu, MEMORY *mem){
+	uint32_t instr = fetch(cpu, mem);
+
+	exec_instr(instr, cpu, mem);
+
+	ASSEM assem;
+	//assem_init(&assem);
+	disassem_instr(instr, &assem);
+
+	putchar('\n');
+	printf(" 0b");
+	print_binary(instr);
+	printf(": ");
+	print_assembly(assem);
+	putchar('\n');
 }

@@ -35,6 +35,7 @@ void option_init(OPTION *option){
 	option->ftype_data = BIN;
 	option->fname_instr = NULL;
 	option->fname_data = NULL;
+	option->mode = NONE;
 }
 
 void option_set(int argn, char **arg, OPTION *option){
@@ -79,4 +80,37 @@ void option_set(int argn, char **arg, OPTION *option){
 void option_free(OPTION *option){
 	free(option->fname_instr);
 	free(option->fname_data);
+}
+
+char *read_space(char *s){
+	while(*s == ' ')
+		s++;
+	return s;
+}
+
+void command_parser(char *s, OPTION *option){
+	int b = 0;
+
+	while(b == 0){
+
+		printf("simulator:>");
+		scanf("%s", s);	
+
+		switch(s[0]){
+			case 'r':
+				option->mode = RUN;
+				b = 1;
+				break;
+			case 's':
+				option->mode = STEP;
+				b = 1;
+				break;
+			case 'q':
+				option->mode = QUIT;
+				b = 1;
+				break;
+			default:
+				printf("invalid command\n");
+		}
+	}
 }

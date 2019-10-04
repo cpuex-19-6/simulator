@@ -10,9 +10,23 @@
 #include "cpu.h"
 #include "memory.h"
 
+typedef enum instr_type_t{
+	R,
+	I, 
+	S, 
+	B, 
+	U, 
+	J,
+}INSTR_TYPE;
+
 uint32_t downto(uint32_t u, int n, int m);
+
+int32_t immediate(uint32_t instr, INSTR_TYPE ip);
 
 void exec_instr(uint32_t instr, CPU *cpu, MEMORY *mem);
 uint32_t fetch(CPU *cpu, MEMORY *mem);
+
+void run_to_the_end(CPU *cpu, MEMORY *mem);
+void step(CPU *cpu, MEMORY *mem);
 
 #endif

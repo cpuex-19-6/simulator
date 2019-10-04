@@ -20,16 +20,31 @@ int main(int argc, char *argv[]){
 	option_set(argc - 1, argv + 1, &option);
 	mem_set(&mem, option);
 
-	uint32_t instr = fetch(&cpu, &mem);
+	char s[COM_LEN];
+//	uint32_t instr = fetch(&cpu, &mem);
+	int quit = 0;
 
-	while(instr != 0){
-		exec_instr(instr, &cpu, &mem);
-		instr = fetch(&cpu, &mem);
+	while(quit == 0){
+		command_parser(s, &option);
+
+		switch(option.mode){
+			case RUN:
+				run_to_the_end(&cpu, &mem);
+				quit = 1;
+				break;
+			case STEP:
+				step(&cpu, &mem);
+				break;
+			default: //case QUIT:
+				quit = 1;
+		}
 	}
 
-	for(int i = 0; i < 32; i++){
-		putchar('\n');
-		printf("x[%2d]:	%d\n", i, cpu.x[i]); 
+	if(option.mode != QUIT){
+		printf("simulation ended: final state\n");
+		for(int i = 0; i < 32; i++){
+			printf("x[%2d]:	%d\n", i, cpu.x[i]); 
+		}
 	}
 
 	option_free(&option);
