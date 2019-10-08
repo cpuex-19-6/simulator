@@ -30,8 +30,7 @@ int main(int argc, char *argv[]){
 
 		switch(option.mode){
 			case RUN:
-				run_to_the_end(&cpu, &mem);
-				quit = 1;
+				if(run_to_the_end(&cpu, &mem, option))quit = 1;
 				break;
 			case STEP:
 				if(step(&cpu, &mem, option))quit = 1;

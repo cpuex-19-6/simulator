@@ -4,6 +4,7 @@
 #include "cpu.h"
 
 #define COM_LEN 128
+#define BP_NUM 30
 
 typedef enum ftype_t{
 	BIN,
@@ -17,6 +18,11 @@ typedef enum mode_t{
 	QUIT,
 }MODE;
 
+typedef struct break_point_t{
+	int *bp;
+	int num;
+}BREAKPOINT;
+
 typedef struct option_t {
 	FTYPE ftype_instr;
 	FTYPE ftype_data;
@@ -24,6 +30,8 @@ typedef struct option_t {
 	char *fname_data;
 	MODE mode;
 	uint32_t reg;
+	BREAKPOINT breakpoint;
+	int to_the_end;
 }OPTION;
 
 void c2b_8(uint8_t *dest, char *source, size_t size);
@@ -36,5 +44,6 @@ void c2b(uint8_t *dest, char *source, size_t size);
 
 void command_parser(char *s, OPTION *option);
 void print_reg(uint32_t reg, CPU cpu);
+int bp_check(CPU cpu, BREAKPOINT breakpoint);
 
 #endif

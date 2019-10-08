@@ -26,7 +26,7 @@ int32_t immediate(uint32_t instr, INSTR_TYPE ip);
 void exec_instr(uint32_t instr, CPU *cpu, MEMORY *mem);
 uint32_t fetch(CPU *cpu, MEMORY *mem);
 
-void run_to_the_end(CPU *cpu, MEMORY *mem);
+int run_to_the_end(CPU *cpu, MEMORY *mem, OPTION option);
 int step(CPU *cpu, MEMORY *mem, OPTION option);
 
 #endif

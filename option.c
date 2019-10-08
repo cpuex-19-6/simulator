@@ -65,6 +65,9 @@ void option_init(OPTION *option){
 	option->fname_data = NULL;
 	option->mode = NONE;
 	option->reg = 0;
+	option->breakpoint.bp = NULL;
+	option->breakpoint.num = 0;
+	option->to_the_end = 1; //run to the end!!!!
 }
 
 void option_set(int argn, char **arg, OPTION *option){
@@ -111,6 +114,8 @@ void option_set(int argn, char **arg, OPTION *option){
 void option_free(OPTION *option){
 	free(option->fname_instr);
 	free(option->fname_data);
+	if(option->breakpoint.bp != NULL)
+		free(option->breakpoint.bp);
 }
 
 char *read_space(char *s){
@@ -128,10 +133,13 @@ void command_parser(char *s, OPTION *option){
 		scanf("%s", s);	
 
 		switch(s[0]){
-			case 'r':
+			case 'r':{
+				if(s[1] == 'e')option->to_the_end = 1;
+				else option->to_the_end = 0;
+
 				option->mode = RUN;
 				b = 1;
-				break;
+				break;}
 			case 's':
 				option->mode = STEP;
 				b = 1;
@@ -144,6 +152,14 @@ void command_parser(char *s, OPTION *option){
 				int d;
 				scanf("%d", &d);
 				option->reg = option->reg | (1 << d);
+				break;}
+			case 'b':{
+				if(option->breakpoint.bp == NULL)
+					option->breakpoint.bp = malloc(BP_NUM*sizeof(int));
+				int d;
+				scanf("%d", &d);
+				option->breakpoint.num++;
+				option->breakpoint.bp[option->breakpoint.num -1] = d;
 				break;}
 			default:
 				printf("invalid command\n");
@@ -159,4 +175,14 @@ void print_reg(uint32_t reg, CPU cpu){
 		reg = reg >> 1;
 	}
 	putchar('\n');
+}
+
+int bp_check(CPU cpu, BREAKPOINT breakpoint){
+	int n = breakpoint.num;
+	int pc = cpu.pc;
+	for(int i = 0; i < n; i++){
+		if(pc == breakpoint.bp[i])
+			return pc;
+	}
+	return 0;
 }

@@ -305,13 +305,21 @@ uint32_t fetch(CPU *cpu, MEMORY *mem){
 	return next_instr;
 }
 
-void run_to_the_end(CPU *cpu, MEMORY *mem){
+int run_to_the_end(CPU *cpu, MEMORY *mem, OPTION option){
 	uint32_t instr = fetch(cpu, mem);
+	int bp;
 	
 	while(instr != 0){
 		exec_instr(instr, cpu, mem);
+		if((option.to_the_end == 0 && (bp = bp_check(*cpu, option.breakpoint)))){
+			putchar('\n');
+			printf("stopped at pc: %d\n", bp);
+			putchar('\n');
+			return 0;
+		}
 		instr = fetch(cpu, mem);
 	}
+	return 1;
 }
 
 int step(CPU *cpu, MEMORY *mem, OPTION option){
