@@ -4,11 +4,11 @@
 #include <stdlib.h>
 
 #include "option.h"
+#include "disassemble.h"
 
 //テキストで表されたデータをバイナリに変換　ただし、8ビットずつ
-//size: len of source
-void c2b(uint8_t *dest, char *source, size_t size){
-	unsigned int count = 0;
+void c2b_8(uint8_t *dest, char *source, size_t size){
+	int count = 0;
 	uint8_t tmp = 0;
 
 	for(int i = 0; i < size; i++){
@@ -16,7 +16,7 @@ void c2b(uint8_t *dest, char *source, size_t size){
 			case '0':
 				break;
 			case '1':
-				tmp = tmp | (1 >> (7-count));
+				tmp = tmp | (1 << (8 - count));
 				break;
 			default:
 				perror("invalid character");
@@ -24,7 +24,32 @@ void c2b(uint8_t *dest, char *source, size_t size){
 		}
 		count++;
 		if(count == 8){
-			dest[i/8] = tmp;
+			*dest = tmp;
+			dest++;
+			count = 0;
+		}
+	}	
+}
+
+void c2b_32(uint32_t *dest, char *source, size_t size){
+	int count = 0;
+	uint32_t tmp = 0;
+
+	for(int i = 0; i < size; i++){
+		switch(source[i]){
+			case '0':
+				break;
+			case '1':
+				tmp = tmp | (1 << (31 - count));
+				break;
+			default:
+				perror("invalid character");
+				exit(EXIT_FAILURE);
+		}
+		count++;
+		if(count == 32){
+			*dest = tmp;
+			dest++;
 			count = 0;
 		}
 	}	

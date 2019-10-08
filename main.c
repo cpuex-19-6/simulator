@@ -7,6 +7,7 @@
 #include "memory.h"
 #include "sim.h"
 #include "option.h"
+#include "disassemble.h"
 
 int main(int argc, char *argv[]){
 	OPTION option;

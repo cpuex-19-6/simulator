@@ -75,7 +75,7 @@ void load_instr_txt(MEMORY *mem, char *filename){
 		perror("failed to load txt instructions");
 		exit(EXIT_FAILURE);
 	}
-	c2b((uint8_t *)mem->instr, tmp, n); //convert txt data to binary
+	c2b_32(mem->instr, tmp, n); //convert txt data to binary
 	fclose(fp);
 }
 
@@ -109,6 +109,6 @@ void load_data_txt(MEMORY *mem, char *filename){
 		perror("failed to load txt data");
 		exit(EXIT_FAILURE);
 	}
-	c2b(mem->data, tmp, n);
+	c2b_8(mem->data, tmp, n);
 	fclose(fp);
 }

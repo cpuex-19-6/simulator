@@ -23,6 +23,8 @@ typedef struct option_t {
 	MODE mode;
 }OPTION;
 
+void c2b_8(uint8_t *dest, char *source, size_t size);
+void c2b_32(uint32_t *dest, char *source, size_t size);
 void option_init(OPTION *option);
 void option_set(int argn, char **arg, OPTION *option);
 void option_free(OPTION *option);
