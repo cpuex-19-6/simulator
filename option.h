@@ -1,6 +1,8 @@
 #ifndef OPTION_INCLUDE
 #define OPTION_INCLUDE
 
+#include "cpu.h"
+
 #define COM_LEN 128
 
 typedef enum ftype_t{
@@ -21,6 +23,7 @@ typedef struct option_t {
 	char *fname_instr;
 	char *fname_data;
 	MODE mode;
+	uint32_t reg;
 }OPTION;
 
 void c2b_8(uint8_t *dest, char *source, size_t size);
@@ -32,5 +35,6 @@ void option_free(OPTION *option);
 void c2b(uint8_t *dest, char *source, size_t size);
 
 void command_parser(char *s, OPTION *option);
+void print_reg(uint32_t reg, CPU cpu);
 
 #endif

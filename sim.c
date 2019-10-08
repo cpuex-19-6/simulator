@@ -314,7 +314,7 @@ void run_to_the_end(CPU *cpu, MEMORY *mem){
 	}
 }
 
-int step(CPU *cpu, MEMORY *mem){
+int step(CPU *cpu, MEMORY *mem, OPTION option){
 	uint32_t instr = fetch(cpu, mem);
 
 	if(instr != 0){
@@ -331,6 +331,9 @@ int step(CPU *cpu, MEMORY *mem){
 		print_assembly(assem);
 		putchar('\n');
 		putchar('\n');
+
+		if(option.reg != 0)print_reg(option.reg, *cpu);
+
 		return 0;
 	}
 	else return 1;

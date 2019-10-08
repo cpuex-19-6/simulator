@@ -27,6 +27,6 @@ void exec_instr(uint32_t instr, CPU *cpu, MEMORY *mem);
 uint32_t fetch(CPU *cpu, MEMORY *mem);
 
 void run_to_the_end(CPU *cpu, MEMORY *mem);
-int step(CPU *cpu, MEMORY *mem);
+int step(CPU *cpu, MEMORY *mem, OPTION option);
 
 #endif

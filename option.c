@@ -5,6 +5,7 @@
 
 #include "option.h"
 #include "disassemble.h"
+#include "cpu.h"
 
 //テキストで表されたデータをバイナリに変換　ただし、8ビットずつ
 void c2b_8(uint8_t *dest, char *source, size_t size){
@@ -63,6 +64,7 @@ void option_init(OPTION *option){
 	option->fname_instr = NULL;
 	option->fname_data = NULL;
 	option->mode = NONE;
+	option->reg = 0;
 }
 
 void option_set(int argn, char **arg, OPTION *option){
@@ -138,8 +140,23 @@ void command_parser(char *s, OPTION *option){
 				option->mode = QUIT;
 				b = 1;
 				break;
+			case 'x':{
+				int d;
+				scanf("%d", &d);
+				option->reg = option->reg | (1 << d);
+				break;}
 			default:
 				printf("invalid command\n");
 		}
 	}
+}
+
+void print_reg(uint32_t reg, CPU cpu){
+	for(int i = 0; i <  32; i++){
+		if(reg & 1){
+			printf("x[%2d]: %d\n", i, cpu.x[i]);
+		}
+		reg = reg >> 1;
+	}
+	putchar('\n');
 }
