@@ -200,32 +200,32 @@ void exec_CB(uint32_t instr, CPU *cpu, MEMORY *mem){
 	switch(f3){
 		case F3_BEQ:
 			if(cpu->x[rs1] == cpu->x[rs2]){
-				cpu->pc += imm;
+				cpu->pc += imm/4;//pc = pc+imm
 			}
 			break;
 		case F3_BNE:
 			if(cpu->x[rs1] != cpu->x[rs2]){
-				cpu->pc += imm;
+				cpu->pc += imm/4;//pc = pc+imm
 			}
 			break;
 		case F3_BLT:
 			if(cpu->x[rs1] < cpu->x[rs2]){
-				cpu->pc += imm;
+				cpu->pc += imm/4;//pc = pc+imm
 			}
 			break;
 		case F3_BGE:
 			if(cpu->x[rs1] >= cpu->x[rs2]){
-				cpu->pc += imm;
+				cpu->pc += imm/4;//pc = pc+imm
 			}
 			break;
 		case F3_BLTU:
 			if((uint32_t)cpu->x[rs1] < (uint32_t)cpu->x[rs2]){
-				cpu->pc += imm;
+				cpu->pc += imm/4;//pc = pc+imm
 			}
 			break;
 		case F3_BGEU:
 			if((uint32_t)cpu->x[rs1] >= (uint32_t)cpu->x[rs2]){
-				cpu->pc += imm;
+				cpu->pc += imm/4;//pc = pc+imm
 			}
 			break;
 		default:
@@ -257,19 +257,19 @@ void exec_instr(uint32_t instr, CPU *cpu, MEMORY *mem){
 		case OP_AUIPC:{
 			int32_t rd = (int32_t)downto(instr, 11, 7);
 			int32_t imm = immediate(instr, U);
-			if(rd != 0)cpu->x[rd] = cpu->pc + imm;
+			if(rd != 0)cpu->x[rd] = cpu->pc + imm/4; //pc = pc+imm
 			break;}
 		case OP_JAL: {
 			int32_t rd = (int32_t)downto(instr, 11, 7);
 			int32_t imm = immediate(instr, J);
-			if(rd != 0)cpu->x[rd] = cpu->pc + 4;
+			if(rd != 0)cpu->x[rd] = cpu->pc + 1;// pc = pc+4;
 			cpu->pc += imm;
 			break;}
 		case OP_JALR: {
 			int32_t rd = (int32_t)downto(instr, 11, 7);
 			int32_t rs1 = (int32_t)downto(instr, 19, 15);
 			int32_t imm = immediate(instr, I);
-			if(rd != 0)cpu->x[rd] = cpu->pc + 4;
+			if(rd != 0)cpu->x[rd] = cpu->pc + 1; // pc = pc+4;
 			cpu->pc = cpu->x[rs1] + imm;
 			break;}
 		case OP_CB: 
@@ -290,6 +290,8 @@ uint32_t fetch(CPU *cpu, MEMORY *mem){
 
 	next_instr = mem->instr[addr_instr];
 
+	cpu->pc += 1;// pc = pc+4;
+
 	return next_instr;
 }
 
@@ -302,19 +304,24 @@ void run_to_the_end(CPU *cpu, MEMORY *mem){
 	}
 }
 
-void step(CPU *cpu, MEMORY *mem){
+int step(CPU *cpu, MEMORY *mem){
 	uint32_t instr = fetch(cpu, mem);
 
-	exec_instr(instr, cpu, mem);
+	if(instr != 0){
+		exec_instr(instr, cpu, mem);
 
-	ASSEM assem;
-	//assem_init(&assem);
-	disassem_instr(instr, &assem);
-
-	putchar('\n');
-	printf(" 0b");
-	print_binary(instr);
-	printf(": ");
-	print_assembly(assem);
-	putchar('\n');
+		ASSEM assem;
+		//assem_init(&assem);
+		disassem_instr(instr, &assem);
+		putchar('\n');
+		printf("pc: %d:", cpu->pc-1);
+		printf(" 0b");
+		print_binary(instr);
+		printf(": ");
+		print_assembly(assem);
+		putchar('\n');
+		putchar('\n');
+		return 0;
+	}
+	else return 1;
 }

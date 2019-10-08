@@ -14,19 +14,20 @@ void c2b_8(uint8_t *dest, char *source, size_t size){
 	for(int i = 0; i < size; i++){
 		switch(source[i]){
 			case '0':
+				count++;
 				break;
 			case '1':
 				tmp = tmp | (1 << (8 - count));
+				count++;
 				break;
 			default:
-				perror("invalid character");
-				exit(EXIT_FAILURE);
+				break;
 		}
-		count++;
 		if(count == 8){
 			*dest = tmp;
 			dest++;
 			count = 0;
+			tmp = 0;
 		}
 	}	
 }
@@ -38,19 +39,20 @@ void c2b_32(uint32_t *dest, char *source, size_t size){
 	for(int i = 0; i < size; i++){
 		switch(source[i]){
 			case '0':
+				count++;
 				break;
 			case '1':
 				tmp = tmp | (1 << (31 - count));
+				count++;
 				break;
 			default:
-				perror("invalid character");
-				exit(EXIT_FAILURE);
+				break;
 		}
-		count++;
 		if(count == 32){
 			*dest = tmp;
 			dest++;
 			count = 0;
+			tmp = 0;
 		}
 	}	
 }
@@ -73,8 +75,10 @@ void option_set(int argn, char **arg, OPTION *option){
 				case 't': //txt file
 					option->ftype_instr = TXT;
 					i++;
+					printf("filename: %s\n", arg[i]);
 					option->fname_instr = malloc(strlen(arg[i]));
 					strcpy(option->fname_instr, arg[i]);
+					printf("option filename: %s\n", option->fname_instr);
 					break;
 				case 'd': //bin data-file
 					option->ftype_data = BIN;

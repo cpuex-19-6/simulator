@@ -34,7 +34,7 @@ int main(int argc, char *argv[]){
 				quit = 1;
 				break;
 			case STEP:
-				step(&cpu, &mem);
+				if(step(&cpu, &mem))quit = 1;
 				break;
 			default: //case QUIT:
 				quit = 1;

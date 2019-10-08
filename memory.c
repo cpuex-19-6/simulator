@@ -5,6 +5,7 @@
 
 #include "option.h"
 #include "memory.h"
+#include "disassemble.h"
 
 void mem_init(MEMORY *mem){	
 	mem->instr = calloc(INSTR_MEM_SIZE, sizeof(uint32_t));
@@ -65,17 +66,25 @@ void load_instr_txt(MEMORY *mem, char *filename){
 	FILE *fp;
 	if((fp = fopen(filename, "r")) == NULL){
 		perror("failed to open file: txt");
-		exit(EXIT_FAILURE);
-	}
+		exit(EXIT_FAILURE); }
 	
-	char tmp[INSTR_MEM_SIZE];
+	char *tmp;
+	tmp = malloc(INSTR_MEM_SIZE*32);
 	int n = 0;
 	
 	if((n = fread(tmp, sizeof(char), INSTR_MEM_SIZE * 32, fp)) == 0){ //read and load txt data
 		perror("failed to load txt instructions");
 		exit(EXIT_FAILURE);
 	}
+	printf("n: %d\n", n);
 	c2b_32(mem->instr, tmp, n); //convert txt data to binary
+
+	printf("test\n");
+	print_binary(*mem->instr);
+	printf("test\n");
+	print_binary(*(mem->instr + 1));
+	printf("test\n");printf("test\n");
+	free(tmp);
 	fclose(fp);
 }
 
