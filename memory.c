@@ -79,11 +79,6 @@ void load_instr_txt(MEMORY *mem, char *filename){
 	printf("n: %d\n", n);
 	c2b_32(mem->instr, tmp, n); //convert txt data to binary
 
-	printf("test\n");
-	print_binary(*mem->instr);
-	printf("test\n");
-	print_binary(*(mem->instr + 1));
-	printf("test\n");printf("test\n");
 	free(tmp);
 	fclose(fp);
 }

@@ -57,7 +57,7 @@ int32_t immediate(uint32_t instr, INSTR_TYPE ip){
 			ans = sign | (im19_12 << 12) | (im20 << 11) | (im30_25 << 5) | (im24_21 << 1) | 0;
 			break;
 		default:
-			exit(EXIT_FAILURE);
+			ans = 0;
 	}
 	return (int32_t)ans;
 }
@@ -202,37 +202,44 @@ void exec_CB(uint32_t instr, CPU *cpu, MEMORY *mem){
 			if(cpu->x[rs1] == cpu->x[rs2]){
 				cpu->pc += imm/4;//pc = pc+imm
 			}
+			else cpu->pc += 1;// pc = pc+4;
 			break;
 		case F3_BNE:
 			if(cpu->x[rs1] != cpu->x[rs2]){
 				cpu->pc += imm/4;//pc = pc+imm
 			}
+			else cpu->pc += 1;// pc = pc+4;
 			break;
 		case F3_BLT:
 			if(cpu->x[rs1] < cpu->x[rs2]){
 				cpu->pc += imm/4;//pc = pc+imm
 			}
+			else cpu->pc += 1;// pc = pc+4;
 			break;
 		case F3_BGE:
 			if(cpu->x[rs1] >= cpu->x[rs2]){
 				cpu->pc += imm/4;//pc = pc+imm
 			}
+			else cpu->pc += 1;// pc = pc+4;
 			break;
 		case F3_BLTU:
 			if((uint32_t)cpu->x[rs1] < (uint32_t)cpu->x[rs2]){
 				cpu->pc += imm/4;//pc = pc+imm
 			}
+			else cpu->pc += 1;// pc = pc+4;
 			break;
 		case F3_BGEU:
 			if((uint32_t)cpu->x[rs1] >= (uint32_t)cpu->x[rs2]){
 				cpu->pc += imm/4;//pc = pc+imm
 			}
+			else cpu->pc += 1;// pc = pc+4;
 			break;
 		default:
 			exit(EXIT_FAILURE);
 	}
 }
 
+//rd がゼロレジスタの時は代入させておいて最後に代入がいい?
 void exec_instr(uint32_t instr, CPU *cpu, MEMORY *mem){
 	uint32_t opcd = downto(instr, 6, 0);
 	
@@ -241,18 +248,23 @@ void exec_instr(uint32_t instr, CPU *cpu, MEMORY *mem){
 			int32_t rd = (int32_t)downto(instr, 11, 7);
 			int32_t imm = immediate(instr, U);
 			if(rd != 0)cpu->x[rd] = imm;
+			cpu->pc += 1;// pc = pc+4;
 			break;}
 		case OP_LA: 
 			exec_LA(instr, cpu, mem);
+			cpu->pc += 1;// pc = pc+4;
 			break;
 		case OP_LAI:
 			exec_LAI(instr, cpu, mem);
+			cpu->pc += 1;// pc = pc+4;
 			break;
 		case OP_LD: 
 			exec_LD(instr, cpu, mem);
+			cpu->pc += 1;// pc = pc+4;
 			break;
 		case OP_ST: 
 			exec_ST(instr, cpu, mem);
+			cpu->pc += 1;// pc = pc+4;
 			break;
 		case OP_AUIPC:{
 			int32_t rd = (int32_t)downto(instr, 11, 7);
@@ -263,14 +275,14 @@ void exec_instr(uint32_t instr, CPU *cpu, MEMORY *mem){
 			int32_t rd = (int32_t)downto(instr, 11, 7);
 			int32_t imm = immediate(instr, J);
 			if(rd != 0)cpu->x[rd] = cpu->pc + 1;// pc = pc+4;
-			cpu->pc += imm;
+			cpu->pc += imm/4;
 			break;}
 		case OP_JALR: {
 			int32_t rd = (int32_t)downto(instr, 11, 7);
 			int32_t rs1 = (int32_t)downto(instr, 19, 15);
 			int32_t imm = immediate(instr, I);
 			if(rd != 0)cpu->x[rd] = cpu->pc + 1; // pc = pc+4;
-			cpu->pc = cpu->x[rs1] + imm;
+			cpu->pc = cpu->x[rs1] + imm/4;
 			break;}
 		case OP_CB: 
 			exec_CB(instr, cpu, mem);
@@ -290,8 +302,6 @@ uint32_t fetch(CPU *cpu, MEMORY *mem){
 
 	next_instr = mem->instr[addr_instr];
 
-	cpu->pc += 1;// pc = pc+4;
-
 	return next_instr;
 }
 
@@ -308,13 +318,13 @@ int step(CPU *cpu, MEMORY *mem){
 	uint32_t instr = fetch(cpu, mem);
 
 	if(instr != 0){
+		putchar('\n');
+		printf("pc: %d:", cpu->pc);
 		exec_instr(instr, cpu, mem);
 
 		ASSEM assem;
 		//assem_init(&assem);
 		disassem_instr(instr, &assem);
-		putchar('\n');
-		printf("pc: %d:", cpu->pc-1);
 		printf(" 0b");
 		print_binary(instr);
 		printf(": ");

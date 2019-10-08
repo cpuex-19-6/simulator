@@ -23,6 +23,7 @@ void mnemonic_LA(uint32_t instr, ASSEM *assem){
 				perror("Unkown instruction");
 				exit(EXIT_FAILURE);
 			}
+			break;
 		case F3_OR:
 			strcpy(assem->mnemonic, "or");
 			break;
