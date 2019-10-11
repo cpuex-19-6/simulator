@@ -71,6 +71,7 @@ void option_init(OPTION *option){
 	option->to_the_end = 1; //run to the end!!!!
 	option->mem_print.mp = NULL;
 	option->mem_print.num = 0;
+	option->step_n = 0;
 }
 
 void option_set(int argn, char **arg, OPTION *option){
@@ -145,10 +146,15 @@ void command_parser(char *s, OPTION *option){
 				option->mode = RUN;
 				b = 1;
 				break;}
-			case 's':
+			case 's':{
+				if(s[1] == 'n'){
+					int d;
+					scanf("%d", &d);
+					option->step_n = d;
+				}
 				option->mode = STEP;
 				b = 1;
-				break;
+				break;}
 			case 'q':
 				option->mode = QUIT;
 				b = 1;

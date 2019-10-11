@@ -57,6 +57,7 @@ typedef struct option_t {
 	BREAKPOINT breakpoint;
 	int to_the_end;
 	MEM_PRINT mem_print;
+	int step_n;
 }OPTION;
 
 void c2b_8(uint8_t *dest, char *source, size_t size);

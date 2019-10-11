@@ -38,7 +38,7 @@ int main(int argc, char *argv[]){
 				if(run_to_the_end(&cpu, &mem, option))quit = 1;
 				break;
 			case STEP:
-				if(step(&cpu, &mem, option))quit = 1;
+				if(step(&cpu, &mem, &option))quit = 1;
 				break;
 			default: //case QUIT:
 				quit = 1;

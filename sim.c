@@ -323,7 +323,7 @@ int run_to_the_end(CPU *cpu, MEMORY *mem, OPTION option){
 	return 1;
 }
 
-int step(CPU *cpu, MEMORY *mem, OPTION option){
+int step(CPU *cpu, MEMORY *mem, OPTION *option){
 	uint32_t instr = fetch(cpu, mem);
 
 	if(instr != 0){
@@ -341,11 +341,15 @@ int step(CPU *cpu, MEMORY *mem, OPTION option){
 		putchar('\n');
 		putchar('\n');
 
-		if(option.reg != 0)print_reg(option.reg, *cpu);
+		if(option->reg != 0)print_reg(option->reg, *cpu);
 
-		if(option.mem_print.num != 0)print_mem(option.mem_print, *mem);
+		if(option->mem_print.num != 0)print_mem(option->mem_print, *mem);
 
-		return 0;
+		if(option->step_n != 0){
+			option->step_n--;
+			return step(cpu, mem, option);
+		}
+		else return 0;
 	}
 	else return 1;
 }
