@@ -345,7 +345,7 @@ int step(CPU *cpu, MEMORY *mem, OPTION *option){
 
 		if(option->mem_print.num != 0)print_mem(option->mem_print, *mem);
 
-		if(option->step_n != 0){
+		if(option->step_n > 0){
 			option->step_n--;
 			return step(cpu, mem, option);
 		}
