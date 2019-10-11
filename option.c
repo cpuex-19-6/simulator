@@ -175,12 +175,17 @@ void command_parser(char *s, OPTION *option){
 			case 'm':{
 				if(option->mem_print.mp == NULL)
 					option->mem_print.mp = malloc(MP_NUM*sizeof(MEM_PRINT));
-				unsigned int d;
+				int d;
 				char c[2];
 				scanf("%s", c);
-				scanf("%u", &d);
+				scanf("%d", &d);
 				int i = option->mem_print.num;
 				int b = 0;
+
+				if(d < 0){
+					printf("invalid address\n");
+					b = 1;
+				}
 
 				switch(c[0]){
 					case 'i':

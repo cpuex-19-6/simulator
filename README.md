@@ -41,6 +41,6 @@ RV32I
 
 `x [d]` インデックスが[d]のレジスタの中身をステップ実行の際に常に表示
 
-`m [type][size] [address]` メモリの[address]番地から[size]分だけを[type]型でステップ実行の際に表示、また、全命令を実行した後にも表示される
+`m [type][size] [address]` メモリの[address]番地から[size]分だけを[type]型でステップ実行の際に表示、また、全命令を実行した後にも表示される`i`でint、`u`でunsigned int。`b`でbyte、`h`でhalf word、`w`でword。
 
 `q` その時点で終了
