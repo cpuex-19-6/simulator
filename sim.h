@@ -9,6 +9,7 @@
 #include "instruction.h"
 #include "cpu.h"
 #include "memory.h"
+#include "option.h"
 
 typedef enum instr_type_t{
 	R,

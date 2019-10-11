@@ -5,6 +5,7 @@
 
 #define COM_LEN 128
 #define BP_NUM 30
+#define MP_NUM 30
 
 typedef enum ftype_t{
 	BIN,
@@ -17,6 +18,29 @@ typedef enum mode_t{
 	STEP,
 	QUIT,
 }MODE;
+
+typedef enum mem_data_t {
+	Int, //int
+	Uint, //unsigned int
+	//Float, //float
+}MEM_DATA_TYPE;
+
+typedef enum mem_data_size_t{
+	Byte, //byte
+	Half, //half
+	Word, //word
+}MEM_DATA_SIZE;
+
+typedef struct mem_print_sub_t {
+	MEM_DATA_TYPE type;
+	MEM_DATA_SIZE size;
+	uint32_t addr;
+}MEM_PRINT_SUB;
+
+typedef struct mem_print_t{
+	MEM_PRINT_SUB *mp;
+	int num;
+}MEM_PRINT;
 
 typedef struct break_point_t{
 	int *bp;
@@ -32,6 +56,7 @@ typedef struct option_t {
 	uint32_t reg;
 	BREAKPOINT breakpoint;
 	int to_the_end;
+	MEM_PRINT mem_print;
 }OPTION;
 
 void c2b_8(uint8_t *dest, char *source, size_t size);

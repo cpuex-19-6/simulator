@@ -24,4 +24,9 @@ void load_data(MEMORY *mem, char *filename); //load data from binary file to mem
 
 void load_instr_txt(MEMORY *mem, char *filename); //load instruction from txt file to memory
 void load_data_txt(MEMORY *mem, char *filename); //load data from txt file to memory
+
+void print_mem(MEM_PRINT mem_print, MEMORY mem);
+
+void endian_wrapper(void *a, void *b, size_t size);
+
 #endif

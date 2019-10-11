@@ -6,6 +6,7 @@
 #include "option.h"
 #include "disassemble.h"
 #include "cpu.h"
+#include "memory.h"
 
 //テキストで表されたデータをバイナリに変換　ただし、8ビットずつ
 void c2b_8(uint8_t *dest, char *source, size_t size){
@@ -68,6 +69,8 @@ void option_init(OPTION *option){
 	option->breakpoint.bp = NULL;
 	option->breakpoint.num = 0;
 	option->to_the_end = 1; //run to the end!!!!
+	option->mem_print.mp = NULL;
+	option->mem_print.num = 0;
 }
 
 void option_set(int argn, char **arg, OPTION *option){
@@ -116,6 +119,8 @@ void option_free(OPTION *option){
 	free(option->fname_data);
 	if(option->breakpoint.bp != NULL)
 		free(option->breakpoint.bp);
+	if(option->mem_print.mp != NULL)
+		free(option->mem_print.mp);
 }
 
 char *read_space(char *s){
@@ -160,6 +165,49 @@ void command_parser(char *s, OPTION *option){
 				scanf("%d", &d);
 				option->breakpoint.num++;
 				option->breakpoint.bp[option->breakpoint.num -1] = d;
+				break;}
+			case 'm':{
+				if(option->mem_print.mp == NULL)
+					option->mem_print.mp = malloc(MP_NUM*sizeof(MEM_PRINT));
+				unsigned int d;
+				char c[2];
+				scanf("%s", c);
+				scanf("%u", &d);
+				int i = option->mem_print.num;
+				int b = 0;
+
+				switch(c[0]){
+					case 'i':
+						option->mem_print.mp[i].type = Int;
+						break;
+					case 'u':
+						option->mem_print.mp[i].type = Uint;
+						break;
+					/*case 'f':
+						option->mem_print.mp[i].type = Foat;
+						break;*/
+					default:
+						printf("invalid command\n");
+						b = 1;
+				}
+
+				 switch(c[1]){
+					 case 'b':
+						 option->mem_print.mp[i].size = Byte;
+						 break;
+					 case 'h':
+						 option->mem_print.mp[i].size = Half;
+						 break;
+					 case 'w':
+						 option->mem_print.mp[i].size = Word;
+						 break;
+					 default:
+						printf("invalid command\n");
+						b = 1;
+				 }
+				 if(b == 1)break;
+				option->mem_print.num++;
+				option->mem_print.mp[i].addr = d;
 				break;}
 			default:
 				printf("invalid command\n");

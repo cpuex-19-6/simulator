@@ -116,3 +116,74 @@ void load_data_txt(MEMORY *mem, char *filename){
 	c2b_8(mem->data, tmp, n);
 	fclose(fp);
 }
+
+void print_mem_sub(MEM_PRINT_SUB mp, MEMORY mem){
+	switch(mp.type){
+		case Int:{
+			int content;
+			int len;
+			switch(mp.size){
+				case Byte:{
+					int8_t d;
+					endian_wrapper(&d, mem.data + mp.addr, sizeof(int8_t));
+					content = d;
+					len = sizeof(int8_t);
+					break;}
+				case Half:{
+				       int16_t d;
+					endian_wrapper(&d, mem.data + mp.addr, sizeof(int16_t));
+					content = d;
+					len = sizeof(int16_t);
+					break;}
+				default:{ //Word
+					int32_t d;
+					endian_wrapper(&d, mem.data + mp.addr, sizeof(int32_t));
+					content = d;
+					len = sizeof(int32_t);
+					}
+			}
+			printf("mem[%d-%d]: (int%d) %d", mp.addr, mp.addr + len, len*8, content);
+			break;}
+		case Uint:{
+			unsigned int content;
+			int len;
+			switch(mp.size){
+				case Byte:{
+					uint8_t d;
+					endian_wrapper(&d, mem.data + mp.addr, sizeof(uint8_t));
+					content = d;
+					len = sizeof(uint8_t);
+					break;}
+				case Half:{
+				        uint16_t d;
+					endian_wrapper(&d, mem.data + mp.addr, sizeof(uint16_t));
+					content = d;
+					len = sizeof(uint16_t);
+					break;}
+				default:{ //Word
+					uint32_t d;
+					endian_wrapper(&d, mem.data + mp.addr, sizeof(uint32_t));
+					content = d;
+					len = sizeof(uint32_t);
+					}
+			}
+			printf("mem[%u-%d]: (uint%d) %u", mp.addr, mp.addr + len-1, len*8, content);
+			break;}
+		default: //Float
+			break;
+	}
+}
+
+void print_mem(MEM_PRINT mem_print, MEMORY mem){
+	for(int i = 0; i < mem_print.num; i++){
+		print_mem_sub(mem_print.mp[i], mem);
+		putchar('\n');
+	}
+	putchar('\n');
+}
+
+//copy b to a with endian wrapping
+void endian_wrapper(void *a, void *b, size_t size){
+	for(int i = 0; i < size; i++)
+		memcpy(a + size -1 - i, b + i, 1);
+}
