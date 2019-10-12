@@ -66,6 +66,7 @@ void option_init(OPTION *option){
 	option->fname_data = NULL;
 	option->mode = NONE;
 	option->reg = 0;
+	option->freg = 0;
 	option->breakpoint.bp = NULL;
 	option->breakpoint.num = 0;
 	option->to_the_end = 1; //run to the end!!!!
@@ -164,6 +165,11 @@ void command_parser(char *s, OPTION *option){
 				scanf("%d", &d);
 				option->reg = option->reg | (1 << d);
 				break;}
+			case 'f':{
+				int d;
+				scanf("%d", &d);
+				option->freg = option->freg | (1 << d);
+				break;}
 			case 'b':{
 				if(option->breakpoint.bp == NULL)
 					option->breakpoint.bp = malloc(BP_NUM*sizeof(int));
@@ -194,9 +200,9 @@ void command_parser(char *s, OPTION *option){
 					case 'u':
 						option->mem_print.mp[i].type = Uint;
 						break;
-					/*case 'f':
-						option->mem_print.mp[i].type = Foat;
-						break;*/
+					case 'f':
+						option->mem_print.mp[i].type = Float;
+						break;
 					default:
 						printf("invalid command\n");
 						b = 1;
@@ -232,6 +238,16 @@ void print_reg(uint32_t reg, CPU cpu){
 			printf("x[%2d]: %d\n", i, cpu.x[i]);
 		}
 		reg = reg >> 1;
+	}
+	putchar('\n');
+}
+
+void print_freg(uint32_t freg, CPU cpu){
+	for(int i = 0; i <  32; i++){
+		if(freg & 1){
+			printf("f[%2d]: %f\n", i, cpu.f[i]);
+		}
+		freg = freg >> 1;
 	}
 	putchar('\n');
 }

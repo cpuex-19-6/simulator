@@ -51,6 +51,10 @@ int main(int argc, char *argv[]){
 			printf("x[%2d]:	%d\n", i, cpu.x[i]); 
 		}
 		putchar('\n');
+		for(int i = 0; i < 32; i++){
+			printf("f[%2d]:	%f\n", i, cpu.f[i]); 
+		}
+		putchar('\n');
 		print_mem(option.mem_print, mem);
 	}
 

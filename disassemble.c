@@ -5,7 +5,9 @@
 
 #include "instruction.h"
 #include "sim.h"
+#include "fpu.h"
 #include "disassemble.h"
+#include "fpu.h"
 
 void mnemonic_LA(uint32_t instr, ASSEM *assem){
 	uint32_t f3 = downto(instr, 14, 12);
@@ -167,6 +169,18 @@ void disassem_instr(uint32_t instr, ASSEM *assem){
 			assem->itype = B;
 			mnemonic_CB(instr, assem);
 			break;
+		//floating point instruction
+		case OP_FLW: //I
+			assem->itype = I;
+			strcpy(assem->mnemonic, "flw");
+			break;
+		case OP_FSW: //S
+			assem->itype = S;
+			strcpy(assem->mnemonic, "fsw");
+			break;
+		case OP_FLA: //R
+			mnemonic_FLA(instr, assem);
+			break;
 		default:
 			perror("Unkown instruction");
 			exit(EXIT_FAILURE);
@@ -181,6 +195,9 @@ void print_assembly(ASSEM assem){
 	switch(assem.itype){
 		case R:
 			printf("%-6s x%-2d, x%-2d, x%-2d", assem.mnemonic, assem.rd, assem.rs1, assem.rs2);
+			break;
+		case R_sub:
+			printf("%-6s x%-2d, x%-2d", assem.mnemonic, assem.rd, assem.rs1);
 			break;
 		case I:
 			printf("%-6s x%-2d, x%-2d, %d", assem.mnemonic, assem.rd, assem.rs1, assem.imm);

@@ -1,5 +1,6 @@
 CC = gcc
 CFLAGS = -Wall -MMD -MP
+LDFLAGS = -lm
 TARGET = sim
 SRCS = $(wildcard *.c)
 OBJS = $(SRCS:%.c=%.o)
@@ -10,7 +11,7 @@ all: $(TARGET)
 -include $(DEPS)
 
 $(TARGET): $(OBJS)
-	$(CC) -g -o $@ $^
+	$(CC) -g -o $@ $^ $(LDFLAGS)
 
 %.o: %.c
 	$(CC) $(CFLAGS) -c $< 

@@ -169,8 +169,12 @@ void print_mem_sub(MEM_PRINT_SUB mp, MEMORY mem){
 			}
 			printf("mem[%u-%d]: (uint%d) %u", mp.addr, mp.addr + len-1, len*8, content);
 			break;}
-		default: //Float
-			break;
+		default:{ //Float
+			float content;
+			int len = sizeof(float);
+			endian_wrapper(&content, mem.data + mp.addr, sizeof(float));
+			printf("mem[%u-%d]: (float) %f", mp.addr, mp.addr + len-1, content);
+			}
 	}
 }
 

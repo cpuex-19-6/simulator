@@ -13,6 +13,7 @@
 
 typedef enum instr_type_t{
 	R,
+	R_sub,
 	I, 
 	S, 
 	B, 

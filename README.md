@@ -1,8 +1,10 @@
 # simulator
 
+※FPUを追加しましたが、まだテストしていません
+
 ## ISA
 
-RV32I
+RV32IF
 
 ## ビルド方法
 
@@ -41,6 +43,14 @@ RV32I
 
 `x [d]` インデックスが[d]のレジスタの中身をステップ実行の際に常に表示
 
-`m [type][size] [address]` メモリの[address]番地から[size]分だけを[type]型でステップ実行の際に表示、また、全命令を実行した後にも表示される`i`でint、`u`でunsigned int。`b`でbyte、`h`でhalf word、`w`でword。
+`f [d]` インデックスが[d]の浮動小数点数レジスタの中身をステップ実行の際に常に表示
+
+`m [type][size] [address]` メモリの[address]番地から[size]分だけを[type]型でステップ実行の際に表示、また、全命令を実行した後にも表示される`i`でint、`u`でunsigned int、`f`でfloat。`b`でbyte、`h`でhalf word、`w`でword。
 
 `q` その時点で終了
+
+## 注意書き
+
+浮動小数点数の計算はCライブラリのものを用いる。
+
+rounding modeは今のところは000すなわちRNEのみを許すようにしてある。

@@ -7,6 +7,7 @@
 #include "instruction.h"
 #include "cpu.h"
 #include "memory.h"
+#include "fpu.h"
 #include "disassemble.h"
 #include "option.h"
 
@@ -57,7 +58,7 @@ int32_t immediate(uint32_t instr, INSTR_TYPE ip){
 			}
 			ans = sign | (im19_12 << 12) | (im20 << 11) | (im30_25 << 5) | (im24_21 << 1) | 0;
 			break;
-		default:
+		default: //R
 			ans = 0;
 	}
 	return (int32_t)ans;
@@ -288,6 +289,18 @@ void exec_instr(uint32_t instr, CPU *cpu, MEMORY *mem){
 		case OP_CB: 
 			exec_CB(instr, cpu, mem);
 			break;
+		case OP_FLW:
+			exec_FLW(instr, cpu, mem);
+			cpu->pc += 1;// pc = pc+4;
+			break;
+		case OP_FSW:
+			exec_FSW(instr, cpu, mem);
+			cpu->pc += 1;// pc = pc+4;
+			break;
+		case OP_FLA:
+			exec_FLA(instr, cpu, mem);
+			cpu->pc += 1;// pc = pc+4;
+			break;
 		default: 
 			putchar('\n');
 			printf(" 0b");
@@ -342,6 +355,8 @@ int step(CPU *cpu, MEMORY *mem, OPTION *option){
 		putchar('\n');
 
 		if(option->reg != 0)print_reg(option->reg, *cpu);
+
+		if(option->freg != 0)print_freg(option->freg, *cpu);
 
 		if(option->mem_print.num != 0)print_mem(option->mem_print, *mem);
 

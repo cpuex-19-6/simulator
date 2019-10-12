@@ -22,7 +22,7 @@ typedef enum mode_t{
 typedef enum mem_data_t {
 	Int, //int
 	Uint, //unsigned int
-	//Float, //float
+	Float, //float
 }MEM_DATA_TYPE;
 
 typedef enum mem_data_size_t{
@@ -54,6 +54,7 @@ typedef struct option_t {
 	char *fname_data;
 	MODE mode;
 	uint32_t reg;
+	uint32_t freg;
 	BREAKPOINT breakpoint;
 	int to_the_end;
 	MEM_PRINT mem_print;
@@ -70,6 +71,7 @@ void c2b(uint8_t *dest, char *source, size_t size);
 
 void command_parser(char *s, OPTION *option);
 void print_reg(uint32_t reg, CPU cpu);
+void print_freg(uint32_t freg, CPU cpu);
 int bp_check(CPU cpu, BREAKPOINT breakpoint);
 
 #endif
