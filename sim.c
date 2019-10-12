@@ -90,6 +90,27 @@ void exec_LA(uint32_t instr, CPU *cpu, MEMORY *mem){
 		case F3_AND: 
 			cpu->x[rd] = cpu->x[rs1] & cpu->x[rs2];
 			break;
+		case F3_XOR:
+			if(f7 == F7_XOR){
+				cpu->x[rd] = cpu->x[rs1] ^ cpu->x[rs2];
+			}
+			else exit(EXIT_FAILURE);
+			break;
+		case F3_SL:
+			if(f7 == F7_SLL){
+				cpu->x[rd] = (unsigned int)cpu->x[rs1] << (unsigned int)(cpu->x[rs2] % 32);
+			}
+			else exit(EXIT_FAILURE);
+			break;
+		case F3_SR:
+			if(f7 == F7_SRL){
+				cpu->x[rd] = (unsigned int)cpu->x[rs1] >> (unsigned int)(cpu->x[rs2] % 32);
+			}
+			else if(f7 == F7_SRA){
+				cpu->x[rd] = (int)cpu->x[rs1] >> (unsigned int)(cpu->x[rs2] % 32);
+			}
+			else exit(EXIT_FAILURE);
+			break;
 		default:
 			exit(EXIT_FAILURE);
 	}	
@@ -99,6 +120,7 @@ void exec_LA(uint32_t instr, CPU *cpu, MEMORY *mem){
 //logic and arithmetic
 void exec_LAI(uint32_t instr, CPU *cpu, MEMORY *mem){
 	uint32_t f3 = downto(instr, 14, 12);
+	uint32_t f7 = downto(instr, 31, 25);
 
 	int32_t rd = (int32_t)downto(instr, 11, 7);
 	int32_t rs1 = (int32_t)downto(instr, 19, 15);
@@ -114,6 +136,25 @@ void exec_LAI(uint32_t instr, CPU *cpu, MEMORY *mem){
 			break;
 		case F3_ANDI:
 			cpu->x[rd] = cpu->x[rs1] & imm;
+			break;
+		case F3_XORI:
+			cpu->x[rd] = cpu->x[rs1] ^ imm;
+			break;
+		case F3_SLI:
+			if(f7 == F7_SLLI){
+				cpu->x[rd] = (unsigned int)cpu->x[rs1] << (imm % 32); 
+			}
+			else exit(EXIT_FAILURE);
+			break;
+		case F3_SRI:
+			if(f7 == F7_SRLI){
+				cpu->x[rd] = (unsigned int)cpu->x[rs1] >> (imm % 32); 
+
+			}
+			else if(f7 == F7_SRAI){
+				cpu->x[rd] = (int)cpu->x[rs1] >> (imm % 32); 
+			}
+			else exit(EXIT_FAILURE);
 			break;
 		default:
 			exit(EXIT_FAILURE);

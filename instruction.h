@@ -8,13 +8,26 @@
 #define F3_A	0b000 //arithmetic
 #define F7_ADD	0b0000000 //add
 #define F7_SUB	0b0100000 //sub
+#define F3_XOR	0b100 //xor
+#define F7_XOR	0b0000000 //xor
 #define F3_OR	0b110 //or
 #define F3_AND	0b111 //and
+#define F3_SL	0b001 //shift left
+#define F7_SLL	0b0000000 //sll
+#define F3_SR	0b101 //shift right
+#define F7_SRL	0b0000000 //srl
+#define F7_SRA	0b00000001 //sra
 
 #define OP_LAI	0b0010011 //logic and arithmetic immediate
 #define F3_ADDI	0b000 //addi
+#define F3_XORI	0b100 //xori
 #define F3_ORI	0b110 //ori
 #define F3_ANDI	0b111 //andi
+#define F3_SLI	0b001 //shift left immediate
+#define F7_SLLI	0b0000000 //slli
+#define F3_SRI	0b101 //shift right immediate
+#define F7_SRLI	0b0000000 //srli
+#define F7_SRAI	0b0100000 //srai
 
 #define OP_LD	0b0000011 //load
 #define F3_LB	0b000 //lb

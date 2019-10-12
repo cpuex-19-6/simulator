@@ -32,6 +32,27 @@ void mnemonic_LA(uint32_t instr, ASSEM *assem){
 		case F3_AND:
 			strcpy(assem->mnemonic, "and");
 			break;
+		case F3_XOR:
+			if(f7 == F7_XOR){
+				strcpy(assem->mnemonic, "xor");
+			}
+			else exit(EXIT_FAILURE);
+			break;
+		case F3_SL:
+			if(f7 == F7_SLL){
+				strcpy(assem->mnemonic, "sll");
+			}
+			else exit(EXIT_FAILURE);
+			break;
+		case F3_SR:
+			if(f7 == F7_SRL){
+				strcpy(assem->mnemonic, "srl");
+			}
+			else if(f7 == F7_SRA){
+				strcpy(assem->mnemonic, "sra");
+			}
+			else exit(EXIT_FAILURE);
+			break;
 		default:
 			perror("Unkown indtruction");
 			exit(EXIT_FAILURE);
@@ -40,6 +61,7 @@ void mnemonic_LA(uint32_t instr, ASSEM *assem){
 
 void mnemonic_LAI(uint32_t instr, ASSEM *assem){
 	uint32_t f3 = downto(instr, 14, 12);
+	uint32_t f7 = downto(instr, 31, 25);
 	
 	switch(f3){
 		case F3_ADDI:
@@ -50,6 +72,25 @@ void mnemonic_LAI(uint32_t instr, ASSEM *assem){
 			break;
 		case F3_ANDI:
 			strcpy(assem->mnemonic, "andi");
+			break;
+		case F3_XORI:
+			strcpy(assem->mnemonic, "xori");
+			break;
+		case F3_SLI:
+			if(f7 == F7_SLLI){
+				strcpy(assem->mnemonic, "slli");
+			}
+			else exit(EXIT_FAILURE);
+			break;
+		case F3_SRI:
+			if(f7 == F7_SRLI){
+				strcpy(assem->mnemonic, "srli");
+
+			}
+			else if(f7 == F7_SRAI){
+				strcpy(assem->mnemonic, "srai");
+			}
+			else exit(EXIT_FAILURE);
 			break;
 		default:
 			perror("Unkown indtruction");
