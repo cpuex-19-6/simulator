@@ -175,8 +175,7 @@ void exec_FLA(uint32_t instr, CPU *cpu, MEMORY *mem){
 		case F7_FSQRT:
 			if(f3 != F3_RM)exit(EXIT_FAILURE);
 			if(rs2 == RS2_FSQRT){
-				double tmp = (double)cpu->f[rs1];
-				cpu->f[rd] = (float)sqrt(tmp);
+				cpu->f[rd] = sqrtf(cpu->f[rs1]);
 			}
 			else exit(EXIT_FAILURE);
 			break;
