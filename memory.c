@@ -125,24 +125,24 @@ void print_mem_sub(MEM_PRINT_SUB mp, MEMORY mem){
 			switch(mp.size){
 				case Byte:{
 					int8_t d;
-					endian_wrapper(&d, mem.data + mp.addr, sizeof(int8_t));
+					endian_wrapper(&d, (void *)(mem.data + mp.addr), sizeof(int8_t));
 					content = d;
 					len = sizeof(int8_t);
 					break;}
 				case Half:{
 				       int16_t d;
-					endian_wrapper(&d, mem.data + mp.addr, sizeof(int16_t));
+					endian_wrapper(&d, (void *)(mem.data + mp.addr), sizeof(int16_t));
 					content = d;
 					len = sizeof(int16_t);
 					break;}
 				default:{ //Word
 					int32_t d;
-					endian_wrapper(&d, mem.data + mp.addr, sizeof(int32_t));
+					endian_wrapper(&d, (void *)(mem.data + mp.addr), sizeof(int32_t));
 					content = d;
 					len = sizeof(int32_t);
 					}
 			}
-			printf("mem[%d-%d]: (int%d) %d", mp.addr, mp.addr + len, len*8, content);
+			printf("mem[%d-%d]: (int%d) %d", mp.addr, mp.addr + len-1, len*8, content);
 			break;}
 		case Uint:{
 			unsigned int content;

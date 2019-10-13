@@ -174,27 +174,27 @@ void exec_LD(uint32_t instr, CPU *cpu, MEMORY *mem){
 	switch(f3){
 		case F3_LB:{
 			int8_t data;
-		        endian_wrapper(&data, mem->data + rs1 + imm, sizeof(int8_t));
+		        endian_wrapper(&data, mem->data + cpu->x[rs1] + imm, sizeof(int8_t));
 			cpu->x[rd] = (int32_t)data;
 			break;}
 		case F3_LH:{
 			int16_t data;
-		        endian_wrapper(&data, mem->data + rs1 + imm, sizeof(int16_t));
+		        endian_wrapper(&data, mem->data + cpu->x[rs1] + imm, sizeof(int16_t));
 			cpu->x[rd] = (int32_t)data;
 			break;}
 		case F3_LW:{
 			int32_t data;
-		        endian_wrapper(&data, mem->data + rs1 + imm, sizeof(int32_t));
+		        endian_wrapper(&data, mem->data + cpu->x[rs1] + imm, sizeof(int32_t));
 			cpu->x[rd] = (int32_t)data;
 			break;}
 		case F3_LBU:{
 			uint8_t data;
-		        endian_wrapper(&data, mem->data + rs1 + imm, sizeof(uint8_t));
+		        endian_wrapper(&data, mem->data + cpu->x[rs1] + imm, sizeof(uint8_t));
 			cpu->x[rd] = (uint32_t)data;
 			break;}
 		case F3_LHU:{
 			uint16_t data;
-		        endian_wrapper (&data, mem->data + rs1 + imm, sizeof(uint16_t));
+		        endian_wrapper (&data, mem->data + cpu->x[rs1] + imm, sizeof(uint16_t));
 			cpu->x[rd] = (uint32_t)data;
 			break;}
 		default:
@@ -216,15 +216,15 @@ void exec_ST(uint32_t instr, CPU *cpu, MEMORY *mem){
 	switch(f3){
 		case F3_SB:{
 			int8_t data = cpu->x[rs2];
-			endian_wrapper(mem->data + rs1 + imm, &data, sizeof(int8_t));
+			endian_wrapper(mem->data + cpu->x[rs1] + imm, &data, sizeof(int8_t));
 			break;}
 		case F3_SH:{
 			int16_t data = cpu->x[rs2];
-			endian_wrapper(mem->data + rs1 + imm, &data, sizeof(int16_t));
+			endian_wrapper(mem->data + cpu->x[rs1] + imm, &data, sizeof(int16_t));
 			break;}
 		case F3_SW:{
 			int32_t data = cpu->x[rs2];
-			endian_wrapper(mem->data + rs1 + imm, &data, sizeof(int32_t));
+			endian_wrapper(mem->data + cpu->x[rs1] + imm, &data, sizeof(int32_t));
 			break;}
 		default:
 			exit(EXIT_FAILURE);

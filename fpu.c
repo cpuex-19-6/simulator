@@ -20,7 +20,7 @@ void exec_FLW(uint32_t instr, CPU *cpu, MEMORY *mem){
 
 	if(f3 == F3_FLW){
 		float data;
-	        endian_wrapper(&data, mem->data + rs1 + imm, sizeof(float));
+	        endian_wrapper(&data, mem->data + cpu->x[rs1] + imm, sizeof(float));
 		cpu->f[rd] = (float)data;
 	}
 	else exit(EXIT_FAILURE);
@@ -37,7 +37,7 @@ void exec_FSW(uint32_t instr, CPU *cpu, MEMORY *mem){
 
 	if(f3 == F3_FSW){
 		float data = cpu->f[rs2];
-		endian_wrapper(mem->data + rs1 + imm, &data, sizeof(float));
+		endian_wrapper(mem->data + cpu->x[rs1] + imm, &data, sizeof(float));
 	}
 	else exit(EXIT_FAILURE);
 }
