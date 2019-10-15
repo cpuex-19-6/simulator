@@ -19,7 +19,7 @@ void c2b_8(uint8_t *dest, char *source, size_t size){
 				count++;
 				break;
 			case '1':
-				tmp = tmp | (1 << (8 - count));
+				tmp = tmp | (1 << (7 - count));
 				count++;
 				break;
 			default:
@@ -85,10 +85,8 @@ void option_set(int argn, char **arg, OPTION *option){
 				case 't': //txt file
 					option->ftype_instr = TXT;
 					i++;
-					printf("filename: %s\n", arg[i]);
 					option->fname_instr = malloc(strlen(arg[i]));
 					strcpy(option->fname_instr, arg[i]);
-					printf("option filename: %s\n", option->fname_instr);
 					break;
 				case 'd': //bin data-file
 					option->ftype_data = BIN;
@@ -164,6 +162,9 @@ void command_parser(char *s, OPTION *option){
 				int d;
 				scanf("%d", &d);
 				option->reg = option->reg | (1 << d);
+				if(s[1] == 'x'){
+					option->reg16 = option->reg16 | (1 << d);
+				}
 				break;}
 			case 'f':{
 				int d;
@@ -232,17 +233,21 @@ void command_parser(char *s, OPTION *option){
 	}
 }
 
-void print_reg(uint32_t reg, CPU cpu){
+void print_reg(OPTION option, CPU cpu){
+	int reg = option.reg;
+	int reg16 = option.reg16;
 	for(int i = 0; i <  32; i++){
 		if(reg & 1){
-			printf("x[%2d]: %d\n", i, cpu.x[i]);
+			if(reg16 & 1)printf("x[%2d]: 0x%x\n", i, cpu.x[i]);
+			else printf("x[%2d]: %d\n", i, cpu.x[i]);
 		}
 		reg = reg >> 1;
 	}
 	putchar('\n');
 }
 
-void print_freg(uint32_t freg, CPU cpu){
+void print_freg(OPTION option, CPU cpu){
+	int freg = option.freg;
 	for(int i = 0; i <  32; i++){
 		if(freg & 1){
 			printf("f[%2d]: %f\n", i, cpu.f[i]);

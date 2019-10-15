@@ -54,6 +54,7 @@ typedef struct option_t {
 	char *fname_data;
 	MODE mode;
 	uint32_t reg;
+	uint32_t reg16;
 	uint32_t freg;
 	BREAKPOINT breakpoint;
 	int to_the_end;
@@ -70,8 +71,8 @@ void option_free(OPTION *option);
 void c2b(uint8_t *dest, char *source, size_t size);
 
 void command_parser(char *s, OPTION *option);
-void print_reg(uint32_t reg, CPU cpu);
-void print_freg(uint32_t freg, CPU cpu);
+void print_reg(OPTION option, CPU cpu);
+void print_freg(OPTION option, CPU cpu);
 int bp_check(CPU cpu, BREAKPOINT breakpoint);
 
 #endif

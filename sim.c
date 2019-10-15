@@ -243,39 +243,39 @@ void exec_CB(uint32_t instr, CPU *cpu, MEMORY *mem){
 	switch(f3){
 		case F3_BEQ:
 			if(cpu->x[rs1] == cpu->x[rs2]){
-				cpu->pc += imm/4;//pc = pc+imm
+				cpu->pc += imm;//pc = pc+imm
 			}
-			else cpu->pc += 1;// pc = pc+4;
+			else cpu->pc += 4;// pc = pc+4;
 			break;
 		case F3_BNE:
 			if(cpu->x[rs1] != cpu->x[rs2]){
-				cpu->pc += imm/4;//pc = pc+imm
+				cpu->pc += imm;//pc = pc+imm
 			}
-			else cpu->pc += 1;// pc = pc+4;
+			else cpu->pc += 4;// pc = pc+4;
 			break;
 		case F3_BLT:
 			if(cpu->x[rs1] < cpu->x[rs2]){
-				cpu->pc += imm/4;//pc = pc+imm
+				cpu->pc += imm;//pc = pc+imm
 			}
-			else cpu->pc += 1;// pc = pc+4;
+			else cpu->pc += 4;// pc = pc+4;
 			break;
 		case F3_BGE:
 			if(cpu->x[rs1] >= cpu->x[rs2]){
-				cpu->pc += imm/4;//pc = pc+imm
+				cpu->pc += imm;//pc = pc+imm
 			}
-			else cpu->pc += 1;// pc = pc+4;
+			else cpu->pc += 4;// pc = pc+4;
 			break;
 		case F3_BLTU:
 			if((uint32_t)cpu->x[rs1] < (uint32_t)cpu->x[rs2]){
-				cpu->pc += imm/4;//pc = pc+imm
+				cpu->pc += imm;//pc = pc+imm
 			}
-			else cpu->pc += 1;// pc = pc+4;
+			else cpu->pc += 4;// pc = pc+4;
 			break;
 		case F3_BGEU:
 			if((uint32_t)cpu->x[rs1] >= (uint32_t)cpu->x[rs2]){
-				cpu->pc += imm/4;//pc = pc+imm
+				cpu->pc += imm;//pc = pc+imm
 			}
-			else cpu->pc += 1;// pc = pc+4;
+			else cpu->pc += 4;// pc = pc+4;
 			break;
 		default:
 			exit(EXIT_FAILURE);
@@ -291,56 +291,56 @@ void exec_instr(uint32_t instr, CPU *cpu, MEMORY *mem){
 			int32_t rd = (int32_t)downto(instr, 11, 7);
 			int32_t imm = immediate(instr, U);
 			if(rd != 0)cpu->x[rd] = imm;
-			cpu->pc += 1;// pc = pc+4;
+			cpu->pc += 4;// pc = pc+4;
 			break;}
 		case OP_LA: 
 			exec_LA(instr, cpu, mem);
-			cpu->pc += 1;// pc = pc+4;
+			cpu->pc += 4;// pc = pc+4;
 			break;
 		case OP_LAI:
 			exec_LAI(instr, cpu, mem);
-			cpu->pc += 1;// pc = pc+4;
+			cpu->pc += 4;// pc = pc+4;
 			break;
 		case OP_LD: 
 			exec_LD(instr, cpu, mem);
-			cpu->pc += 1;// pc = pc+4;
+			cpu->pc += 4;// pc = pc+4;
 			break;
 		case OP_ST: 
 			exec_ST(instr, cpu, mem);
-			cpu->pc += 1;// pc = pc+4;
+			cpu->pc += 4;// pc = pc+4;
 			break;
 		case OP_AUIPC:{
 			int32_t rd = (int32_t)downto(instr, 11, 7);
 			int32_t imm = immediate(instr, U);
-			if(rd != 0)cpu->x[rd] = cpu->pc + imm/4; //pc = pc+imm
+			if(rd != 0)cpu->x[rd] = cpu->pc + imm; //pc = pc+imm
 			break;}
 		case OP_JAL: {
 			int32_t rd = (int32_t)downto(instr, 11, 7);
 			int32_t imm = immediate(instr, J);
-			if(rd != 0)cpu->x[rd] = cpu->pc + 1;// pc = pc+4;
-			cpu->pc += imm/4;
+			if(rd != 0)cpu->x[rd] = cpu->pc + 4;// pc = pc+4;
+			cpu->pc += imm;
 			break;}
 		case OP_JALR: {
 			int32_t rd = (int32_t)downto(instr, 11, 7);
 			int32_t rs1 = (int32_t)downto(instr, 19, 15);
 			int32_t imm = immediate(instr, I);
-			if(rd != 0)cpu->x[rd] = cpu->pc + 1; // pc = pc+4;
-			cpu->pc = cpu->x[rs1] + imm/4;
+			if(rd != 0)cpu->x[rd] = cpu->pc + 4; // pc = pc+4;
+			cpu->pc = cpu->x[rs1] + imm;
 			break;}
 		case OP_CB: 
 			exec_CB(instr, cpu, mem);
 			break;
 		case OP_FLW:
 			exec_FLW(instr, cpu, mem);
-			cpu->pc += 1;// pc = pc+4;
+			cpu->pc += 4;// pc = pc+4;
 			break;
 		case OP_FSW:
 			exec_FSW(instr, cpu, mem);
-			cpu->pc += 1;// pc = pc+4;
+			cpu->pc += 4;// pc = pc+4;
 			break;
 		case OP_FLA:
 			exec_FLA(instr, cpu, mem);
-			cpu->pc += 1;// pc = pc+4;
+			cpu->pc += 4;// pc = pc+4;
 			break;
 		default: 
 			putchar('\n');
@@ -355,7 +355,7 @@ uint32_t fetch(CPU *cpu, MEMORY *mem){
 	uint32_t next_instr;
 	uint32_t addr_instr = cpu->pc;
 
-	next_instr = mem->instr[addr_instr];
+	endian_wrapper(&next_instr, (mem->instr + addr_instr), sizeof(uint32_t));
 
 	return next_instr;
 }
@@ -395,9 +395,9 @@ int step(CPU *cpu, MEMORY *mem, OPTION *option){
 		putchar('\n');
 		putchar('\n');
 
-		if(option->reg != 0)print_reg(option->reg, *cpu);
+		if(option->reg != 0)print_reg(*option, *cpu);
 
-		if(option->freg != 0)print_freg(option->freg, *cpu);
+		if(option->freg != 0)print_freg(*option, *cpu);
 
 		if(option->mem_print.num != 0)print_mem(option->mem_print, *mem);
 

@@ -8,10 +8,9 @@
 #include "disassemble.h"
 
 void mem_init(MEMORY *mem){	
-	mem->instr = calloc(INSTR_MEM_SIZE, sizeof(uint32_t));
+	mem->instr = calloc(INSTR_MEM_SIZE, sizeof(uint8_t));
 	mem->data = calloc(DATA_MEM_SIZE, sizeof(uint8_t));
-	if(mem->instr == NULL)printf("NULL OFF\n");
-	memset(mem->instr, 0, sizeof(uint32_t)*INSTR_MEM_SIZE);
+	memset(mem->instr, 0, sizeof(uint8_t)*INSTR_MEM_SIZE);
 	memset(mem->data, 0, sizeof(uint8_t)*DATA_MEM_SIZE);
 }
 
@@ -21,6 +20,7 @@ void mem_set(MEMORY *mem, OPTION option){
 		exit(EXIT_FAILURE);
 	}
 	else{
+		printf("using \"%s\" as instruction file\n", option.fname_instr);
 		if(option.ftype_instr == BIN){
 			load_instr(mem, option.fname_instr);
 		}
@@ -30,6 +30,7 @@ void mem_set(MEMORY *mem, OPTION option){
 	}
 
 	if(option.fname_data != NULL){
+		printf("using \"%s\" as data file\n", option.fname_data);
 		if(option.ftype_data == BIN){
 			load_data(mem, option.fname_data);
 		}
@@ -52,12 +53,12 @@ void load_instr(MEMORY *mem, char *filename){
 	}	
 	int n = 0;
 
-	if ((n = fread(mem->instr, sizeof(uint32_t), INSTR_MEM_SIZE, fp)) == 0){ 
+	if ((n = fread(mem->instr, sizeof(uint8_t), INSTR_MEM_SIZE, fp)) == 0){ 
 	/*サイズとかあってる?ファイルサイズを取得するべき？*/
 		perror("failed to load instructions to memory");
 		exit(EXIT_FAILURE);
 	}
-	printf("n: %d\n", n);
+	printf("loaded size : %d byte\n", n);
 	
 	fclose(fp);
 }
@@ -69,15 +70,16 @@ void load_instr_txt(MEMORY *mem, char *filename){
 		exit(EXIT_FAILURE); }
 	
 	char *tmp;
-	tmp = malloc(INSTR_MEM_SIZE*32);
+	tmp = malloc(INSTR_MEM_SIZE*8);
 	int n = 0;
 	
-	if((n = fread(tmp, sizeof(char), INSTR_MEM_SIZE * 32, fp)) == 0){ //read and load txt data
+	if((n = fread(tmp, sizeof(char), INSTR_MEM_SIZE * 8, fp)) == 0){ //read and load txt data
 		perror("failed to load txt instructions");
 		exit(EXIT_FAILURE);
 	}
-	printf("n: %d\n", n);
-	c2b_32(mem->instr, tmp, n); //convert txt data to binary
+	c2b_8(mem->instr, tmp, n); //convert txt data to binary
+	//c2b_32(mem->instr, tmp, n); //convert txt data to binary
+	printf("loaded size : %d byte\n", n);
 
 	free(tmp);
 	fclose(fp);
@@ -89,12 +91,14 @@ void load_data(MEMORY *mem, char *filename){
 		perror("failed to open file");
 		exit(EXIT_FAILURE);
 	}	
+	int n = 0;
 
-	if (fread(mem->data, sizeof(uint8_t), DATA_MEM_SIZE, fp) == 0){ 
+	if ((n = fread(mem->data, sizeof(uint8_t), DATA_MEM_SIZE, fp)) == 0){ 
 	/*サイズとかあってる?ファイルサイズを取得するべき？*/
 		perror("failed to load data to memory");
 		exit(EXIT_FAILURE);
 	}
+	printf("loaded size : %d byte\n", n);
 	
 	fclose(fp);
 }
@@ -106,13 +110,15 @@ void load_data_txt(MEMORY *mem, char *filename){
 		exit(EXIT_FAILURE);
 	}
 	
-	char tmp[DATA_MEM_SIZE];
+	char *tmp;
+	tmp = malloc(DATA_MEM_SIZE*8);
 	int n = 0;
 	
 	if((n = fread(tmp, sizeof(char), DATA_MEM_SIZE * 8, fp)) == 0){
 		perror("failed to load txt data");
 		exit(EXIT_FAILURE);
 	}
+	printf("loaded size : %d byte\n", n);
 	c2b_8(mem->data, tmp, n);
 	fclose(fp);
 }
@@ -191,3 +197,4 @@ void endian_wrapper(void *a, void *b, size_t size){
 	for(int i = 0; i < size; i++)
 		memcpy(a + size -1 - i, b + i, 1);
 }
+
