@@ -15,28 +15,52 @@ void mnemonic_LA(uint32_t instr, ASSEM *assem){
 
 	switch(f3){
 		case F3_A:
-			if(f7 == F7_ADD){
-				strcpy(assem->mnemonic, "add");
-			}
-			else if(f7 == F7_SUB){
-				strcpy(assem->mnemonic, "sub");
-			}
-			else{
-				perror("Unkown instruction");
-				exit(EXIT_FAILURE);
+			switch(f7){
+				case F7_ADD:
+					strcpy(assem->mnemonic, "add");
+					break;
+				case F7_SUB:
+					strcpy(assem->mnemonic, "sub");
+					break;
+				default:
+					exit(EXIT_FAILURE);
 			}
 			break;
-		case F3_OR:
-			strcpy(assem->mnemonic, "or");
+		case F3_OR: 
+			switch(f7){
+				case F7_OR:
+					strcpy(assem->mnemonic, "or");
+					break;
+				case F7_REM:
+					strcpy(assem->mnemonic, "rem");
+					break;
+				default:
+					exit(EXIT_FAILURE);
+			}
 			break;
-		case F3_AND:
-			strcpy(assem->mnemonic, "and");
+		case F3_AND: 
+			switch(f7){
+				case F7_AND:
+					strcpy(assem->mnemonic, "and");
+					break;
+				case F7_REMU:
+					strcpy(assem->mnemonic, "remu");
+					break;
+				default:
+					exit(EXIT_FAILURE);
+			}
 			break;
 		case F3_XOR:
-			if(f7 == F7_XOR){
-				strcpy(assem->mnemonic, "xor");
+			switch(f7){
+				case F7_XOR:
+					strcpy(assem->mnemonic, "xor");
+					break;
+				case F7_DIV:
+					strcpy(assem->mnemonic, "div");
+					break;
+				default:
+					exit(EXIT_FAILURE);
 			}
-			else exit(EXIT_FAILURE);
 			break;
 		case F3_SL:
 			if(f7 == F7_SLL){
@@ -45,16 +69,21 @@ void mnemonic_LA(uint32_t instr, ASSEM *assem){
 			else exit(EXIT_FAILURE);
 			break;
 		case F3_SR:
-			if(f7 == F7_SRL){
-				strcpy(assem->mnemonic, "srl");
+			switch(f7){
+				case F7_DIVU:
+					strcpy(assem->mnemonic, "divu");
+					break;
+				case F7_SRL:
+					strcpy(assem->mnemonic, "srl");
+					break;
+				case F7_SRA:
+					strcpy(assem->mnemonic, "sra");
+					break;
+				default:
+					exit(EXIT_FAILURE);
 			}
-			else if(f7 == F7_SRA){
-				strcpy(assem->mnemonic, "sra");
-			}
-			else exit(EXIT_FAILURE);
 			break;
 		default:
-			perror("Unkown indtruction");
 			exit(EXIT_FAILURE);
 	}
 }

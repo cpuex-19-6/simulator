@@ -8,15 +8,26 @@
 #define F3_A	0b000 //arithmetic
 #define F7_ADD	0b0000000 //add
 #define F7_SUB	0b0100000 //sub
-#define F3_XOR	0b100 //xor
+
+#define F3_XOR	0b100 //xor, div
 #define F7_XOR	0b0000000 //xor
-#define F3_OR	0b110 //or
-#define F3_AND	0b111 //and
+#define F7_DIV	0b0000001 //div
+
+#define F3_OR	0b110 //or, rem
+#define F7_OR	0b0000000 //or
+#define F7_REM	0b0000001 //rem
+
+#define F3_AND	0b111 //and, remu
+#define F7_AND	0b0000000 //and
+#define F7_REMU	0b0000001 //remu
+
 #define F3_SL	0b001 //shift left
 #define F7_SLL	0b0000000 //sll
-#define F3_SR	0b101 //shift right
+
+#define F3_SR	0b101 //shift right, divu
+#define F7_DIVU	0b0000001 //divu
 #define F7_SRL	0b0000000 //srl
-#define F7_SRA	0b00000001 //sra
+#define F7_SRA	0b0100000 //sra
 
 #define OP_LAI	0b0010011 //logic and arithmetic immediate
 #define F3_ADDI	0b000 //addi

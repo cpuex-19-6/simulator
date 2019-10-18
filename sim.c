@@ -76,25 +76,52 @@ void exec_LA(uint32_t instr, CPU *cpu, MEMORY *mem){
 	if(rd != 0){
 	switch(f3){
 		case F3_A:
-			if(f7 == F7_ADD){
-				cpu->x[rd] = cpu->x[rs1] + cpu->x[rs2];
+			switch(f7){
+				case F7_ADD:
+					cpu->x[rd] = cpu->x[rs1] + cpu->x[rs2];
+					break;
+				case F7_SUB:
+					cpu->x[rd] = cpu->x[rs1] - cpu->x[rs2];
+					break;
+				default:
+					exit(EXIT_FAILURE);
 			}
-			else if (f7 == F7_SUB){
-				cpu->x[rd] = cpu->x[rs1] - cpu->x[rs2];
-			}
-			else exit(EXIT_FAILURE);
 			break;
 		case F3_OR: 
-			cpu->x[rd] = cpu->x[rs1] | cpu->x[rs2];
+			switch(f7){
+				case F7_OR:
+					cpu->x[rd] = cpu->x[rs1] | cpu->x[rs2];
+					break;
+				case F7_REM:
+					cpu->x[rd] = (int32_t)cpu->x[rs1] % (int32_t)cpu->x[rs2];
+					break;
+				default:
+					exit(EXIT_FAILURE);
+			}
 			break;
 		case F3_AND: 
-			cpu->x[rd] = cpu->x[rs1] & cpu->x[rs2];
+			switch(f7){
+				case F7_AND:
+					cpu->x[rd] = cpu->x[rs1] & cpu->x[rs2];
+					break;
+				case F7_REMU:
+					cpu->x[rd] = (uint32_t)cpu->x[rs1] % (uint32_t)cpu->x[rs2];
+					break;
+				default:
+					exit(EXIT_FAILURE);
+			}
 			break;
 		case F3_XOR:
-			if(f7 == F7_XOR){
-				cpu->x[rd] = cpu->x[rs1] ^ cpu->x[rs2];
+			switch(f7){
+				case F7_XOR:
+					cpu->x[rd] = cpu->x[rs1] ^ cpu->x[rs2];
+					break;
+				case F7_DIV:
+					cpu->x[rd] = (int32_t)cpu->x[rs1] / (int32_t)cpu->x[rs2];
+					break;
+				default:
+					exit(EXIT_FAILURE);
 			}
-			else exit(EXIT_FAILURE);
 			break;
 		case F3_SL:
 			if(f7 == F7_SLL){
@@ -103,13 +130,19 @@ void exec_LA(uint32_t instr, CPU *cpu, MEMORY *mem){
 			else exit(EXIT_FAILURE);
 			break;
 		case F3_SR:
-			if(f7 == F7_SRL){
-				cpu->x[rd] = (unsigned int)cpu->x[rs1] >> (unsigned int)(cpu->x[rs2] % 32);
+			switch(f7){
+				case F7_DIVU:
+					cpu->x[rd] = (uint32_t)cpu->x[rs1] / (uint32_t)cpu->x[rs2];
+					break;
+				case F7_SRL:
+					cpu->x[rd] = (unsigned int)cpu->x[rs1] >> (unsigned int)(cpu->x[rs2] % 32);
+					break;
+				case F7_SRA:
+					cpu->x[rd] = (int)cpu->x[rs1] >> (unsigned int)(cpu->x[rs2] % 32);
+					break;
+				default:
+					exit(EXIT_FAILURE);
 			}
-			else if(f7 == F7_SRA){
-				cpu->x[rd] = (int)cpu->x[rs1] >> (unsigned int)(cpu->x[rs2] % 32);
-			}
-			else exit(EXIT_FAILURE);
 			break;
 		default:
 			exit(EXIT_FAILURE);
@@ -175,8 +208,8 @@ void exec_LD(uint32_t instr, CPU *cpu, MEMORY *mem){
 	if(rd != 0){
 	switch(f3){
 		case F3_LB:{
-			int8_t data;
 			offset = (cpu->x[rs1] + imm);
+			int8_t data;
 		        endian_wrapper(&data, mem->data + offset, sizeof(int8_t));
 			cpu->x[rd] = (int32_t)data;
 			break;}
