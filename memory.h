@@ -7,8 +7,8 @@
 
 #include "option.h"
 
-#define INSTR_MEM_SIZE 4194304 //number of 8 bit cells
-#define DATA_MEM_SIZE 4194304 //number of 8 bit cells
+#define INSTR_MEM_SIZE 131072 //number of 8 bit cells 4byte * 1 << 15
+#define DATA_MEM_SIZE 2097152 //number of 8 bit cells 1byte * 1 << 21
 
 typedef struct memory_t {
 	uint8_t *instr;

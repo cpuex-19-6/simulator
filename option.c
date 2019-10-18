@@ -9,6 +9,7 @@
 #include "memory.h"
 
 //テキストで表されたデータをバイナリに変換　ただし、8ビットずつ
+//命令メモリの方で使うものなので、エンディアンは調整していない（遅くなるから）
 void c2b_8(uint8_t *dest, char *source, size_t size){
 	int count = 0;
 	uint8_t tmp = 0;

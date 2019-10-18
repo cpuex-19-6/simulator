@@ -18,9 +18,11 @@ void exec_FLW(uint32_t instr, CPU *cpu, MEMORY *mem){
 	int32_t rs1 = (int32_t)downto(instr, 19, 15);
 	int32_t imm = immediate(instr, I);
 
+	int offset = (cpu->x[rs1] + imm) & ((~0) << 2);
+
 	if(f3 == F3_FLW){
 		float data;
-	        endian_wrapper(&data, mem->data + cpu->x[rs1] + imm, sizeof(float));
+	        endian_wrapper(&data, mem->data + offset, sizeof(float));
 		cpu->f[rd] = (float)data;
 	}
 	else exit(EXIT_FAILURE);
@@ -35,9 +37,11 @@ void exec_FSW(uint32_t instr, CPU *cpu, MEMORY *mem){
 
 	int32_t imm = immediate(instr, S);
 
+	int offset = (cpu->x[rs1] + imm) & ((~0) << 2);
+
 	if(f3 == F3_FSW){
 		float data = cpu->f[rs2];
-		endian_wrapper(mem->data + cpu->x[rs1] + imm, &data, sizeof(float));
+		endian_wrapper(mem->data + offset, &data, sizeof(float));
 	}
 	else exit(EXIT_FAILURE);
 }

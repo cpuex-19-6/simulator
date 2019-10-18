@@ -170,31 +170,38 @@ void exec_LD(uint32_t instr, CPU *cpu, MEMORY *mem){
 	int32_t rs1 = (int32_t)downto(instr, 19, 15);
 	int32_t imm = immediate(instr, I);
 
+	int offset;
+
 	if(rd != 0){
 	switch(f3){
 		case F3_LB:{
 			int8_t data;
-		        endian_wrapper(&data, mem->data + cpu->x[rs1] + imm, sizeof(int8_t));
+			offset = (cpu->x[rs1] + imm);
+		        endian_wrapper(&data, mem->data + offset, sizeof(int8_t));
 			cpu->x[rd] = (int32_t)data;
 			break;}
 		case F3_LH:{
+			offset = (cpu->x[rs1] + imm) & ((~0) << 1);
 			int16_t data;
-		        endian_wrapper(&data, mem->data + cpu->x[rs1] + imm, sizeof(int16_t));
+		        endian_wrapper(&data, mem->data + offset, sizeof(int16_t));
 			cpu->x[rd] = (int32_t)data;
 			break;}
 		case F3_LW:{
+			offset = (cpu->x[rs1] + imm) & ((~0) << 2);
 			int32_t data;
-		        endian_wrapper(&data, mem->data + cpu->x[rs1] + imm, sizeof(int32_t));
+		        endian_wrapper(&data, mem->data + offset, sizeof(int32_t));
 			cpu->x[rd] = (int32_t)data;
 			break;}
 		case F3_LBU:{
+			offset = (cpu->x[rs1] + imm);
 			uint8_t data;
-		        endian_wrapper(&data, mem->data + cpu->x[rs1] + imm, sizeof(uint8_t));
+		        endian_wrapper(&data, mem->data + offset, sizeof(uint8_t));
 			cpu->x[rd] = (uint32_t)data;
 			break;}
 		case F3_LHU:{
+			offset = (cpu->x[rs1] + imm) & ((~0) << 1);
 			uint16_t data;
-		        endian_wrapper (&data, mem->data + cpu->x[rs1] + imm, sizeof(uint16_t));
+		        endian_wrapper (&data, mem->data + offset, sizeof(uint16_t));
 			cpu->x[rd] = (uint32_t)data;
 			break;}
 		default:
@@ -212,19 +219,24 @@ void exec_ST(uint32_t instr, CPU *cpu, MEMORY *mem){
 
 	int32_t imm = immediate(instr, S);
 
+	int offset;
+
 	//これでちゃんと下位ビットを取れているのか
 	switch(f3){
 		case F3_SB:{
+			offset = (cpu->x[rs1] + imm);
 			int8_t data = cpu->x[rs2];
-			endian_wrapper(mem->data + cpu->x[rs1] + imm, &data, sizeof(int8_t));
+			endian_wrapper(mem->data + offset, &data, sizeof(int8_t));
 			break;}
 		case F3_SH:{
+			offset = (cpu->x[rs1] + imm) & ((~0) << 1);
 			int16_t data = cpu->x[rs2];
-			endian_wrapper(mem->data + cpu->x[rs1] + imm, &data, sizeof(int16_t));
+			endian_wrapper(mem->data + offset, &data, sizeof(int16_t));
 			break;}
 		case F3_SW:{
+			offset = (cpu->x[rs1] + imm) & ((~0) << 2);
 			int32_t data = cpu->x[rs2];
-			endian_wrapper(mem->data + cpu->x[rs1] + imm, &data, sizeof(int32_t));
+			endian_wrapper(mem->data + offset, &data, sizeof(int32_t));
 			break;}
 		default:
 			exit(EXIT_FAILURE);
@@ -239,6 +251,7 @@ void exec_CB(uint32_t instr, CPU *cpu, MEMORY *mem){
 	int32_t rs2 = (int32_t)downto(instr, 24, 20);
 
 	int32_t imm = immediate(instr, B);
+	imm = imm & ((~0) << 2); //immediate wrapping
 
 	switch(f3){
 		case F3_BEQ:
@@ -312,11 +325,13 @@ void exec_instr(uint32_t instr, CPU *cpu, MEMORY *mem){
 		case OP_AUIPC:{
 			int32_t rd = (int32_t)downto(instr, 11, 7);
 			int32_t imm = immediate(instr, U);
+			imm = imm & ((~0) << 2); // immediate wrapping
 			if(rd != 0)cpu->x[rd] = cpu->pc + imm; //pc = pc+imm
 			break;}
 		case OP_JAL: {
 			int32_t rd = (int32_t)downto(instr, 11, 7);
 			int32_t imm = immediate(instr, J);
+			imm = imm & ((~0) << 2); // immediate wrapping
 			if(rd != 0)cpu->x[rd] = cpu->pc + 4;// pc = pc+4;
 			cpu->pc += imm;
 			break;}
@@ -325,7 +340,8 @@ void exec_instr(uint32_t instr, CPU *cpu, MEMORY *mem){
 			int32_t rs1 = (int32_t)downto(instr, 19, 15);
 			int32_t imm = immediate(instr, I);
 			if(rd != 0)cpu->x[rd] = cpu->pc + 4; // pc = pc+4;
-			cpu->pc = cpu->x[rs1] + imm;
+			int address = (cpu->x[rs1] + imm) & ((~0) << 2);
+			cpu->pc = address;
 			break;}
 		case OP_CB: 
 			exec_CB(instr, cpu, mem);
