@@ -268,6 +268,8 @@ void print_assembly(ASSEM assem){
 			break;
 		case R_sub:
 			printf("%-6s x%-2d, x%-2d", assem.mnemonic, assem.rd, assem.rs1);
+			if(strcmp(assem.mnemonic, "froundrm") == 0)
+				printf(", %s", assem.rm);
 			break;
 		case I:
 			printf("%-6s x%-2d, x%-2d, %d", assem.mnemonic, assem.rd, assem.rs1, assem.imm);

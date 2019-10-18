@@ -3,6 +3,7 @@
 #include <string.h>
 #include <stdint.h>
 #include <math.h>
+#include <fenv.h>
 
 #include "cpu.h"
 #include "memory.h"
@@ -74,6 +75,37 @@ void exec_FSGNJ(int instr, CPU *cpu, MEMORY *mem){
 			cpu->f[rd] = *((float *)(&data)); 
 			break;
 		default:
+			exit(EXIT_FAILURE);
+	}
+}
+
+void exec_FROUND(int instr, CPU *cpu, MEMORY *mem){
+	uint32_t rm = downto(instr, 14, 12);
+
+	int32_t rd = (int32_t)downto(instr, 11, 7);
+	int32_t rs1 = (int32_t)downto(instr, 19, 15);
+
+	switch(rm){
+		case RM_RNE:
+			fesetround(FE_TONEAREST);
+			cpu->f[rd] = nearbyint(cpu->f[rs1]);
+			break;
+		case RM_RTZ:
+			fesetround(FE_TOWARDZERO);
+			cpu->f[rd] = nearbyint(cpu->f[rs1]);
+			break;
+			break;
+		case RM_RDN:
+			cpu->f[rd] = floorf(cpu->f[rs1]);
+			break;
+		case RM_RUP:
+			cpu->f[rd] = ceilf(cpu->f[rs1]);
+			break;
+		case RM_RMM:
+			cpu->f[rd] = roundf(cpu->f[rs1]);
+			break;
+		default:
+			perror("invalid rounding mode");
 			exit(EXIT_FAILURE);
 	}
 }
@@ -186,6 +218,9 @@ void exec_FLA(uint32_t instr, CPU *cpu, MEMORY *mem){
 		case F7_FSGNJ:
 			exec_FSGNJ(instr, cpu, mem);
 			break;
+		case F7_FROUND:
+			exec_FROUND(instr, cpu, mem);
+			break;
 		case F7_TOF:
 			exec_TOF(instr, cpu, mem);
 			break;
@@ -276,6 +311,31 @@ void mnemonic_FLA(uint32_t instr, ASSEM *assem){
 					exit(EXIT_FAILURE);
 			}
 			break;
+		case F7_FROUND:
+			if(rs2 == RS2_FROUND){
+				switch(f3){
+					case RM_RNE:
+					strcpy(assem->rm, "RNE");
+						break;
+					case RM_RTZ:
+					strcpy(assem->rm, "RTZ");
+						break;
+					case RM_RDN:
+					strcpy(assem->rm, "RDN");
+						break;
+					case RM_RUP:
+					strcpy(assem->rm, "RUP");
+						break;
+					case RM_RMM:
+					strcpy(assem->rm, "RMM");
+						break;
+					default:
+						perror("invalid rounding mode");
+						exit(EXIT_FAILURE);
+				}
+				assem->itype = R;
+				strcpy(assem->mnemonic, "froundrm");
+			}
 		case F7_TOF:
 			assem->itype = R_sub;
 			switch(rs2){

@@ -10,6 +10,7 @@ typedef struct assem_t {
 	int32_t rs2;
 	int32_t imm;
 	char mnemonic[10];
+	char rm[3];
 }ASSEM;
 
 //void assem_init(ASSEM *assem);
