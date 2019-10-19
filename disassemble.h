@@ -5,6 +5,7 @@
 
 typedef struct assem_t {
 	INSTR_TYPE itype;
+	char reg[3];
 	int32_t rd;
 	int32_t rs1;
 	int32_t rs2;
@@ -16,7 +17,5 @@ typedef struct assem_t {
 //void assem_init(ASSEM *assem);
 void disassem_instr(uint32_t instr, ASSEM *assem);
 void print_assembly(ASSEM assem);
-
-void print_binary(uint32_t instr);
 
 #endif

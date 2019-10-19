@@ -10,10 +10,13 @@
 #include "cpu.h"
 #include "memory.h"
 #include "option.h"
+#include "io.h"
 
 typedef enum instr_type_t{
 	R,
 	R_sub,
+	R_sub_sub,
+	R_sub_sub_sub,
 	I, 
 	S, 
 	B, 
@@ -21,14 +24,12 @@ typedef enum instr_type_t{
 	J,
 }INSTR_TYPE;
 
-uint32_t downto(uint32_t u, int n, int m);
-
 int32_t immediate(uint32_t instr, INSTR_TYPE ip);
 
-void exec_instr(uint32_t instr, CPU *cpu, MEMORY *mem);
+void exec_instr(uint32_t instr, CPU *cpu, MEMORY *mem, IO *io);
 uint32_t fetch(CPU *cpu, MEMORY *mem);
 
-int run_to_the_end(CPU *cpu, MEMORY *mem, OPTION option);
-int step(CPU *cpu, MEMORY *mem, OPTION *option);
+int run_to_the_end(CPU *cpu, MEMORY *mem, IO *io, OPTION option);
+int step(CPU *cpu, MEMORY *mem, IO *io, OPTION *option);
 
 #endif

@@ -114,4 +114,14 @@
 #define F3_FLT 0b001 //flt
 #define F3_FLE 0b000 //fle
 
+#define OP_IN 0b0001011 //input
+#define INW 0b00000000000000000010 //inw
+#define INF 0b01000000000000000010 //inw
+
+#define OP_OUT 0b0101011 //input
+#define OUTW12 0b000000000000 //outw
+#define OUTW8 0b00000000 //outw
+#define OUTB12 0b000000000000 //outw
+#define OUTB8 0b01000000 //outw
+
 #endif

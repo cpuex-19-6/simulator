@@ -3,68 +3,18 @@
 #include <string.h>
 #include <stdlib.h>
 
+#include "functions.h"
 #include "option.h"
-#include "disassemble.h"
 #include "cpu.h"
 #include "memory.h"
-
-//テキストで表されたデータをバイナリに変換　ただし、8ビットずつ
-//命令メモリの方で使うものなので、エンディアンは調整していない（遅くなるから）
-void c2b_8(uint8_t *dest, char *source, size_t size){
-	int count = 0;
-	uint8_t tmp = 0;
-
-	for(int i = 0; i < size; i++){
-		switch(source[i]){
-			case '0':
-				count++;
-				break;
-			case '1':
-				tmp = tmp | (1 << (7 - count));
-				count++;
-				break;
-			default:
-				break;
-		}
-		if(count == 8){
-			*dest = tmp;
-			dest++;
-			count = 0;
-			tmp = 0;
-		}
-	}	
-}
-
-void c2b_32(uint32_t *dest, char *source, size_t size){
-	int count = 0;
-	uint32_t tmp = 0;
-
-	for(int i = 0; i < size; i++){
-		switch(source[i]){
-			case '0':
-				count++;
-				break;
-			case '1':
-				tmp = tmp | (1 << (31 - count));
-				count++;
-				break;
-			default:
-				break;
-		}
-		if(count == 32){
-			*dest = tmp;
-			dest++;
-			count = 0;
-			tmp = 0;
-		}
-	}	
-}
 
 void option_init(OPTION *option){
 	option->ftype_instr = BIN;
 	option->ftype_data = BIN;
+	option->ftype_output = BIN;
 	option->fname_instr = NULL;
 	option->fname_data = NULL;
+	option->fname_output = NULL;
 	option->mode = NONE;
 	option->reg = 0;
 	option->freg = 0;
@@ -89,18 +39,42 @@ void option_set(int argn, char **arg, OPTION *option){
 					option->fname_instr = malloc(strlen(arg[i]));
 					strcpy(option->fname_instr, arg[i]);
 					break;
-				case 'd': //bin data-file
-					option->ftype_data = BIN;
-					i++;
-					option->fname_data = malloc(strlen(arg[i]));
-					strcpy(option->fname_instr, arg[i]);
+				case 'd': //data-file
+					if(arg[i][2] == 'b'){ //binary data file
+						option->ftype_data = BIN;
+						i++;
+						option->fname_data = malloc(strlen(arg[i]));
+						strcpy(option->fname_data, arg[i]);
+					}
+					else if(arg[i][2] == 't'){ //txt data file
+						option->ftype_data = TXT;
+						i++;
+						option->fname_data = malloc(strlen(arg[i]));
+						strcpy(option->fname_data, arg[i]);
+					}
+					else {
+						perror("invalid option");
+						exit(EXIT_FAILURE);
+					}
 					break;
-				case 'e': //txt data-file
-					option->ftype_data = TXT;
-					i++;
-					option->fname_data = malloc(strlen(arg[i]));
-					strcpy(option->fname_instr, arg[i]);
-					break;
+				case 'o':{ //binary output file
+					if(arg[i][2] == 'b'){ //binary output file
+						option->ftype_output = BIN;
+						i++;
+						option->fname_output = malloc(strlen(arg[i]));
+						strcpy(option->fname_output, arg[i]);
+					}
+					else if(arg[i][2] == 't'){ //txt data file
+						option->ftype_output = TXT;
+						i++;
+						option->fname_output = malloc(strlen(arg[i]));
+						strcpy(option->fname_output, arg[i]);
+					}
+					else {
+						perror("invalid option");
+						exit(EXIT_FAILURE);
+					}
+					 break;}
 				default:
 					perror("invalid option");
 					exit(EXIT_FAILURE);
@@ -118,6 +92,7 @@ void option_set(int argn, char **arg, OPTION *option){
 void option_free(OPTION *option){
 	free(option->fname_instr);
 	free(option->fname_data);
+	free(option->fname_output);
 	if(option->breakpoint.bp != NULL)
 		free(option->breakpoint.bp);
 	if(option->mem_print.mp != NULL)

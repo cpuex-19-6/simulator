@@ -3,6 +3,8 @@
 #include <stdint.h>
 #include <stdlib.h>
 
+
+#include "functions.h"
 #include "sim.h"
 #include "instruction.h"
 #include "cpu.h"
@@ -10,11 +12,7 @@
 #include "fpu.h"
 #include "disassemble.h"
 #include "option.h"
-
-uint32_t downto(uint32_t u, int n, int m){
-	uint32_t ans = (u << (31-n)) >> (31- n + m);
-	return ans;
-}
+#include "io.h"
 
 //即値生成　無駄が多いが、仕様書と見た目が同じになるように
 int32_t immediate(uint32_t instr, INSTR_TYPE ip){
@@ -58,7 +56,7 @@ int32_t immediate(uint32_t instr, INSTR_TYPE ip){
 			}
 			ans = sign | (im19_12 << 12) | (im20 << 11) | (im30_25 << 5) | (im24_21 << 1) | 0;
 			break;
-		default: //R
+		default: //R, R_sub, R_sub_sub, R_sub_sub_sub
 			ans = 0;
 	}
 	return (int32_t)ans;
@@ -329,7 +327,7 @@ void exec_CB(uint32_t instr, CPU *cpu, MEMORY *mem){
 }
 
 //rd がゼロレジスタの時は代入させておいて最後に代入がいい?
-void exec_instr(uint32_t instr, CPU *cpu, MEMORY *mem){
+void exec_instr(uint32_t instr, CPU *cpu, MEMORY *mem, IO *io){
 	uint32_t opcd = downto(instr, 6, 0);
 	
 	switch(opcd){
@@ -391,6 +389,14 @@ void exec_instr(uint32_t instr, CPU *cpu, MEMORY *mem){
 			exec_FLA(instr, cpu, mem);
 			cpu->pc += 4;// pc = pc+4;
 			break;
+		case OP_IN:
+			exec_IN(instr, cpu, mem, io);
+			cpu->pc += 4;// pc = pc+4;
+			break;
+		case OP_OUT:
+			exec_OUT(instr, cpu, mem, io);
+			cpu->pc += 4;// pc = pc+4;
+			break;
 		default: 
 			putchar('\n');
 			printf(" 0b");
@@ -409,12 +415,12 @@ uint32_t fetch(CPU *cpu, MEMORY *mem){
 	return next_instr;
 }
 
-int run_to_the_end(CPU *cpu, MEMORY *mem, OPTION option){
+int run_to_the_end(CPU *cpu, MEMORY *mem, IO *io, OPTION option){
 	uint32_t instr = fetch(cpu, mem);
 	int bp;
 	
 	while(instr != 0){
-		exec_instr(instr, cpu, mem);
+		exec_instr(instr, cpu, mem, io);
 		if((option.to_the_end == 0 && (bp = bp_check(*cpu, option.breakpoint)))){
 			putchar('\n');
 			printf("stopped at pc: %d\n", bp);
@@ -426,13 +432,13 @@ int run_to_the_end(CPU *cpu, MEMORY *mem, OPTION option){
 	return 1;
 }
 
-int step(CPU *cpu, MEMORY *mem, OPTION *option){
+int step(CPU *cpu, MEMORY *mem, IO *io, OPTION *option){
 	uint32_t instr = fetch(cpu, mem);
 
 	if(instr != 0){
 		putchar('\n');
 		printf("pc: %d:", cpu->pc);
-		exec_instr(instr, cpu, mem);
+		exec_instr(instr, cpu, mem, io);
 
 		ASSEM assem;
 		//assem_init(&assem);
@@ -452,7 +458,7 @@ int step(CPU *cpu, MEMORY *mem, OPTION *option){
 
 		if(option->step_n > 0){
 			option->step_n--;
-			return step(cpu, mem, option);
+			return step(cpu, mem, io, option);
 		}
 		else return 0;
 	}

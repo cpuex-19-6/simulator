@@ -1,10 +1,10 @@
 # simulator
 
-※FPUを追加しましたが、まだテストしていません
+※FPU, IOを追加しましたが、まだテストしていません
 
 ## ISA
 
-RV32IF
+RV32IF + alpha
 
 ## ビルド方法
 
@@ -17,7 +17,7 @@ RV32IF
 
 ファイルがテキストの場合`./sim -t instr_file`
 
-命令ファイルは必須です。ただし、メモリに初期値を設定したい場合は下に示すようなオプションで設定可能です。
+命令ファイルは必須です。ただし、入出力ファイルを設定したい場合は下に示すようなオプションで設定可能です。
   
 使用ファイルのオプションをつけて実行した後にコマンドを打ってシミュレーションを行えます。  
   
@@ -25,9 +25,13 @@ RV32IF
 
 `-t txt-instruction-file`
 
-`-d data-file`
+`-db binary-data-file`
 
-`-e txt-data-file`
+`-dt txt-data-file`
+
+`-ob binary-output-file`
+
+`-ot txt-output-file`
 
 ## command
 

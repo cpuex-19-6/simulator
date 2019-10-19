@@ -5,6 +5,7 @@
 #include <math.h>
 #include <fenv.h>
 
+#include "functions.h"
 #include "cpu.h"
 #include "memory.h"
 #include "sim.h"
@@ -264,6 +265,7 @@ void mnemonic_FLA(uint32_t instr, ASSEM *assem){
 			else{
 				assem->itype = R;
 				strcpy(assem->mnemonic, "fadd");
+				strcpy(assem->reg, "fff");
 			}
 			break;
 		case F7_FSUB:
@@ -271,6 +273,7 @@ void mnemonic_FLA(uint32_t instr, ASSEM *assem){
 			else{
 				assem->itype = R;
 				strcpy(assem->mnemonic, "fsub");
+				strcpy(assem->reg, "fff");
 			}
 			break;
 		case F7_FMUL:
@@ -278,6 +281,7 @@ void mnemonic_FLA(uint32_t instr, ASSEM *assem){
 			else{
 				assem->itype = R;
 				strcpy(assem->mnemonic, "fmul");
+				strcpy(assem->reg, "fff");
 			}
 			break;
 		case F7_FDIV:
@@ -285,6 +289,7 @@ void mnemonic_FLA(uint32_t instr, ASSEM *assem){
 			else{
 				assem->itype = R;
 				strcpy(assem->mnemonic, "fdiv");
+				strcpy(assem->reg, "fff");
 			}
 			break;
 		case F7_FSQRT:
@@ -292,11 +297,13 @@ void mnemonic_FLA(uint32_t instr, ASSEM *assem){
 			if(rs2 == RS2_FSQRT){
 				assem->itype = R_sub;
 				strcpy(assem->mnemonic, "fsqrt");
+				strcpy(assem->reg, "ff");
 			}
 			else exit(EXIT_FAILURE);
 			break;
 		case F7_FSGNJ:
 			assem->itype = R;
+			strcpy(assem->reg, "fff");
 			switch(f3){
 				case F3_FSGNJ:
 					strcpy(assem->mnemonic, "fsgnj");
@@ -335,9 +342,11 @@ void mnemonic_FLA(uint32_t instr, ASSEM *assem){
 				}
 				assem->itype = R;
 				strcpy(assem->mnemonic, "froundrm");
+				strcpy(assem->reg, "ff");
 			}
 		case F7_TOF:
 			assem->itype = R_sub;
+			strcpy(assem->reg, "fx");
 			switch(rs2){
 				case RS2_ITOF:
 					strcpy(assem->mnemonic, "itof");
@@ -351,6 +360,7 @@ void mnemonic_FLA(uint32_t instr, ASSEM *assem){
 			break;
 		case F7_TOI:
 			assem->itype = R_sub;
+			strcpy(assem->reg, "xf");
 			switch(rs2){
 				case RS2_FTOI:
 					strcpy(assem->mnemonic, "ftoi");
@@ -367,6 +377,7 @@ void mnemonic_FLA(uint32_t instr, ASSEM *assem){
 			if(rs2 == RS2_FMVI){
 				assem->itype = R_sub;
 				strcpy(assem->mnemonic, "fmvi");
+				strcpy(assem->reg, "fx");
 			}
 			break;
 		case F7_IMVF:
@@ -374,10 +385,12 @@ void mnemonic_FLA(uint32_t instr, ASSEM *assem){
 			if(rs2 == RS2_IMVF){
 				assem->itype = R_sub;
 				strcpy(assem->mnemonic, "imvf");
+				strcpy(assem->reg, "xf");
 			}
 			break;
 		case F7_FCOMPARE:
 			assem->itype = R;
+			strcpy(assem->reg, "xff");
 			switch(f3){
 				case F3_FEQ:
 					strcpy(assem->mnemonic, "feq");

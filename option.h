@@ -50,8 +50,10 @@ typedef struct break_point_t{
 typedef struct option_t {
 	FTYPE ftype_instr;
 	FTYPE ftype_data;
+	FTYPE ftype_output;
 	char *fname_instr;
 	char *fname_data;
+	char *fname_output;
 	MODE mode;
 	uint32_t reg;
 	uint32_t reg16;
@@ -62,13 +64,9 @@ typedef struct option_t {
 	int step_n;
 }OPTION;
 
-void c2b_8(uint8_t *dest, char *source, size_t size);
-void c2b_32(uint32_t *dest, char *source, size_t size);
 void option_init(OPTION *option);
 void option_set(int argn, char **arg, OPTION *option);
 void option_free(OPTION *option);
-
-void c2b(uint8_t *dest, char *source, size_t size);
 
 void command_parser(char *s, OPTION *option);
 void print_reg(OPTION option, CPU cpu);

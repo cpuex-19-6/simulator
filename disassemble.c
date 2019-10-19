@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "functions.h"
 #include "instruction.h"
 #include "sim.h"
 #include "fpu.h"
@@ -199,6 +200,51 @@ void mnemonic_CB(uint32_t instr, ASSEM *assem){
 	}
 }
 
+void mnemonic_IN(uint32_t instr, ASSEM *assem){
+	int32_t f20 = downto(instr, 31, 12); 
+
+	switch(f20){
+		case INW:
+			strcpy(assem->mnemonic, "inw");
+			strcpy(assem->reg, "x");
+			break;
+		case INF:
+			strcpy(assem->mnemonic, "inf");
+			strcpy(assem->reg, "f");
+			break;
+		default:
+			perror("invalid instruction");
+			exit(EXIT_FAILURE);
+	}
+}
+
+void mnemonic_OUT(uint32_t instr, ASSEM *assem){
+	int32_t f12 = downto(instr, 31, 20); 
+	int32_t f8 = downto(instr, 14, 7);
+
+	switch(f8){
+		case OUTW8:
+			if(f12 != OUTW12){
+				perror("invalid instruction");
+				exit(EXIT_FAILURE);
+			}
+			strcpy(assem->mnemonic, "outw");
+			strcpy(assem->reg, "x");
+			break;
+		case OUTB8:
+			if(f12 != OUTW12){
+				perror("invalid instruction");
+				exit(EXIT_FAILURE);
+			}
+			strcpy(assem->mnemonic, "outb");
+			strcpy(assem->reg, "x");
+			break;
+		default:
+			perror("invalid instruction");
+			exit(EXIT_FAILURE);
+	}
+}
+
 void disassem_instr(uint32_t instr, ASSEM *assem){
 	uint32_t opcd = downto(instr, 6, 0);
 
@@ -206,50 +252,69 @@ void disassem_instr(uint32_t instr, ASSEM *assem){
 		case OP_LUI:	//U
 			assem->itype = U;
 			strcpy(assem->mnemonic, "lui");
+			strcpy(assem->reg, "x");
 			break;
 		case OP_LA:	//R
 			assem->itype = R;
 			mnemonic_LA(instr, assem);
+			strcpy(assem->reg, "xxx");
 			break;
 		case OP_LAI:	//I
 			assem->itype = I;
 			mnemonic_LAI(instr, assem);
+			strcpy(assem->reg, "xx");
 			break;
 		case OP_LD:	//I
 			assem->itype = I;
 			mnemonic_LD(instr, assem);
+			strcpy(assem->reg, "xx");
 			break;
 		case OP_ST:	//S
 			assem->itype = S;
 			mnemonic_ST(instr, assem);
+			strcpy(assem->reg, "xx");
 			break;
 		case OP_AUIPC:	//U
 			assem->itype = U;
 			strcpy(assem->mnemonic, "auipc");
+			strcpy(assem->reg, "x");
 			break;
 		case OP_JAL:	//J
 			assem->itype = J;
 			strcpy(assem->mnemonic, "jal");
+			strcpy(assem->reg, "x");
 			break;
 		case OP_JALR:	//I
 			assem->itype = I;
 			strcpy(assem->mnemonic, "jalr");
+			strcpy(assem->reg, "xx");
 			break;
 		case OP_CB:	//B
 			assem->itype = B;
 			mnemonic_CB(instr, assem);
+			strcpy(assem->reg, "xx");
 			break;
 		//floating point instruction
 		case OP_FLW: //I
 			assem->itype = I;
 			strcpy(assem->mnemonic, "flw");
+			strcpy(assem->reg, "fx");
 			break;
 		case OP_FSW: //S
 			assem->itype = S;
 			strcpy(assem->mnemonic, "fsw");
+			strcpy(assem->reg, "xf");
 			break;
-		case OP_FLA: //R
+		case OP_FLA: //R or R_sub
 			mnemonic_FLA(instr, assem);
+			break;
+		case OP_IN: //R_sub_sub
+			assem->itype = R_sub_sub;
+			mnemonic_IN(instr, assem);
+			break;
+		case OP_OUT: //R_sub_sub
+			assem->itype = R_sub_sub_sub;
+			mnemonic_OUT(instr, assem);
 			break;
 		default:
 			perror("Unkown instruction");
@@ -264,44 +329,32 @@ void disassem_instr(uint32_t instr, ASSEM *assem){
 void print_assembly(ASSEM assem){
 	switch(assem.itype){
 		case R:
-			printf("%-6s x%-2d, x%-2d, x%-2d", assem.mnemonic, assem.rd, assem.rs1, assem.rs2);
+			printf("%-6s %c%-2d, %c%-2d, %c%-2d", assem.mnemonic, assem.reg[0], assem.rd, assem.reg[1] ,assem.rs1, assem.reg[2] ,assem.rs2);
 			break;
 		case R_sub:
-			printf("%-6s x%-2d, x%-2d", assem.mnemonic, assem.rd, assem.rs1);
+			printf("%-6s %c%-2d, %c%-2d", assem.mnemonic, assem.reg[0], assem.rd, assem.reg[1] ,assem.rs1);
 			if(strcmp(assem.mnemonic, "froundrm") == 0)
 				printf(", %s", assem.rm);
 			break;
+		case R_sub_sub:
+			printf("%-6s %c%-2d", assem.mnemonic, assem.reg[0], assem.rd);
+			break;
+		case R_sub_sub_sub:
+			printf("%-6s %c%-2d", assem.mnemonic, assem.reg[0], assem.rs1);
+			break;
 		case I:
-			printf("%-6s x%-2d, x%-2d, %d", assem.mnemonic, assem.rd, assem.rs1, assem.imm);
+			printf("%-6s %c%-2d, %c%-2d, %d", assem.mnemonic, assem.reg[0], assem.rd, assem.reg[1], assem.rs1, assem.imm);
 			break;
 		case S:
-			printf("%-6s x%-2d, x%-2d, %d", assem.mnemonic, assem.rs1, assem.rs2, assem.imm);
+			printf("%-6s %c%-2d, %c%-2d, %d", assem.mnemonic, assem.reg[0], assem.rs1, assem.reg[1], assem.rs2, assem.imm);
 			break;
 		case B:
-			printf("%-6s x%-2d, x%-2d, %d", assem.mnemonic, assem.rs1, assem.rs2, assem.imm);
+			printf("%-6s %c%-2d, %c%-2d, %d", assem.mnemonic, assem.reg[0], assem.rs1, assem.reg[1], assem.rs2, assem.imm);
 			break;
 		case U:
-			printf("%-6s x%-2d, %d", assem.mnemonic, assem.rd, assem.imm);
+			printf("%-6s %c%-2d, %d", assem.mnemonic, assem.reg[0], assem.rd, assem.imm);
 			break;
 		default: //J
-			printf("%-6s x%-2d, %d", assem.mnemonic, assem.rd, assem.imm);
+			printf("%-6s %c%-2d, %d", assem.mnemonic, assem.reg[0], assem.rd, assem.imm);
 	}
-}
-
-void print_binary(uint32_t instr){
-	uint32_t check = 1 << 31;
-	char s[33];
-
-	for(int i = 0; i < 32; i++){
-		if(check & instr){
-			s[i] = '1';
-		}
-		else {
-			s[i] = '0';
-		}
-		instr = instr << 1;
-	}
-	s[32] = '\0';
-
-	printf("%s", s);
 }

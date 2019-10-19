@@ -3,9 +3,10 @@
 #include <string.h>
 #include <stdlib.h>
 
+
+#include "functions.h"
 #include "option.h"
 #include "memory.h"
-#include "disassemble.h"
 
 void mem_init(MEMORY *mem){	
 	mem->instr = calloc(INSTR_MEM_SIZE, sizeof(uint8_t));
@@ -29,7 +30,7 @@ void mem_set(MEMORY *mem, OPTION option){
 		}
 	}
 
-	if(option.fname_data != NULL){
+	/*if(option.fname_data != NULL){
 		printf("using \"%s\" as data file\n", option.fname_data);
 		if(option.ftype_data == BIN){
 			load_data(mem, option.fname_data);
@@ -37,7 +38,7 @@ void mem_set(MEMORY *mem, OPTION option){
 		else{ //TXT
 			load_data_txt(mem, option.fname_data);
 		}
-	}
+	}*/
 }
 
 void mem_free(MEMORY *mem){
@@ -191,10 +192,3 @@ void print_mem(MEM_PRINT mem_print, MEMORY mem){
 	}
 	putchar('\n');
 }
-
-//copy b to a with endian wrapping
-void endian_wrapper(void *a, void *b, size_t size){
-	for(int i = 0; i < size; i++)
-		memcpy(a + size -1 - i, b + i, 1);
-}
-

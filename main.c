@@ -8,18 +8,22 @@
 #include "sim.h"
 #include "option.h"
 #include "disassemble.h"
+#include "io.h"
 
 int main(int argc, char *argv[]){
 	OPTION option;
 	CPU cpu;
 	MEMORY mem;
+	IO io;
 
 	option_init(&option);
 	cpu_init(&cpu);
 	mem_init(&mem);
+	io_init(&io);
 
 	option_set(argc - 1, argv + 1, &option);
 	mem_set(&mem, option);
+	io_set(&io, option);
 
 	char s[COM_LEN];
 	int quit = 0;
@@ -29,10 +33,10 @@ int main(int argc, char *argv[]){
 
 		switch(option.mode){
 			case RUN:
-				if(run_to_the_end(&cpu, &mem, option))quit = 1;
+				if(run_to_the_end(&cpu, &mem, &io, option))quit = 1;
 				break;
 			case STEP:
-				if(step(&cpu, &mem, &option))quit = 1;
+				if(step(&cpu, &mem, &io, &option))quit = 1;
 				break;
 			default: //case QUIT:
 				quit = 1;
@@ -55,5 +59,6 @@ int main(int argc, char *argv[]){
 
 	option_free(&option);
 	mem_free(&mem);
+	io_close(&io);
 	return 0;
 }

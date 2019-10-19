@@ -27,6 +27,4 @@ void load_data_txt(MEMORY *mem, char *filename); //load data from txt file to me
 
 void print_mem(MEM_PRINT mem_print, MEMORY mem);
 
-void endian_wrapper(void *a, void *b, size_t size);
-
 #endif
