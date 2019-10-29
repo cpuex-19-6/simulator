@@ -94,7 +94,7 @@ void exec_IN(uint32_t instr, CPU *cpu, MEMORY *mem, IO *io){
 			}
 			break;}
 		default:
-			perror("invalid instruction");
+			perror("invalid f20: OP_IN");
 			exit(EXIT_FAILURE);
 	}
 }
@@ -109,7 +109,7 @@ void exec_OUT(uint32_t instr, CPU *cpu, MEMORY *mem, IO *io){
 	switch(f8){
 		case OUTW8:{
 			if(f12 != OUTW12){
-				perror("invalid instruction");
+				perror("invalid f12: OUTW8");
 				exit(EXIT_FAILURE);
 			}
 			int32_t data = cpu->x[rs1];
@@ -125,7 +125,7 @@ void exec_OUT(uint32_t instr, CPU *cpu, MEMORY *mem, IO *io){
 			break;}
 		case OUTB8:{
 			if(f12 != OUTW12){
-				perror("invalid instruction");
+				perror("invalid f12: OUTB8");
 				exit(EXIT_FAILURE);
 			}
 			int8_t data = cpu->x[rs1];
@@ -140,7 +140,7 @@ void exec_OUT(uint32_t instr, CPU *cpu, MEMORY *mem, IO *io){
 			}
 			break;}
 		default:
-			perror("invalid instruction");
+			perror("invalid f8: OP_OUT");
 			exit(EXIT_FAILURE);
 	}
 }
