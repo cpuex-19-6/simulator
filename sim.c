@@ -83,6 +83,7 @@ void exec_LA(uint32_t instr, CPU *cpu, MEMORY *mem){
 					cpu->x[rd] = cpu->x[rs1] - cpu->x[rs2];
 					break;
 				default:
+					perror("invalid f7: F3_A");
 					exit(EXIT_FAILURE);
 			}
 			break;
@@ -95,6 +96,7 @@ void exec_LA(uint32_t instr, CPU *cpu, MEMORY *mem){
 					cpu->x[rd] = (int32_t)cpu->x[rs1] % (int32_t)cpu->x[rs2];
 					break;
 				default:
+					perror("invalid f7: F3_OR");
 					exit(EXIT_FAILURE);
 			}
 			break;
@@ -107,6 +109,7 @@ void exec_LA(uint32_t instr, CPU *cpu, MEMORY *mem){
 					cpu->x[rd] = (uint32_t)cpu->x[rs1] % (uint32_t)cpu->x[rs2];
 					break;
 				default:
+					perror("invalid f7: F3_AND");
 					exit(EXIT_FAILURE);
 			}
 			break;
@@ -119,6 +122,7 @@ void exec_LA(uint32_t instr, CPU *cpu, MEMORY *mem){
 					cpu->x[rd] = (int32_t)cpu->x[rs1] / (int32_t)cpu->x[rs2];
 					break;
 				default:
+					perror("invalid f7: F3_XOR");
 					exit(EXIT_FAILURE);
 			}
 			break;
@@ -126,7 +130,10 @@ void exec_LA(uint32_t instr, CPU *cpu, MEMORY *mem){
 			if(f7 == F7_SLL){
 				cpu->x[rd] = (unsigned int)cpu->x[rs1] << (unsigned int)(cpu->x[rs2] % 32);
 			}
-			else exit(EXIT_FAILURE);
+			else {
+				perror("invalid f7: F3_SL");
+				exit(EXIT_FAILURE);
+			}
 			break;
 		case F3_SR:
 			switch(f7){
@@ -140,10 +147,12 @@ void exec_LA(uint32_t instr, CPU *cpu, MEMORY *mem){
 					cpu->x[rd] = (int)cpu->x[rs1] >> (unsigned int)(cpu->x[rs2] % 32);
 					break;
 				default:
+					perror("invalid f7: F3_SR");
 					exit(EXIT_FAILURE);
 			}
 			break;
 		default:
+			perror("invalid f3: OP_LA");
 			exit(EXIT_FAILURE);
 	}	
 	}
@@ -176,7 +185,10 @@ void exec_LAI(uint32_t instr, CPU *cpu, MEMORY *mem){
 			if(f7 == F7_SLLI){
 				cpu->x[rd] = (unsigned int)cpu->x[rs1] << (imm % 32); 
 			}
-			else exit(EXIT_FAILURE);
+			else {
+				perror("invalid f7: F3_SLI");
+				exit(EXIT_FAILURE);
+			}
 			break;
 		case F3_SRI:
 			if(f7 == F7_SRLI){
@@ -186,9 +198,13 @@ void exec_LAI(uint32_t instr, CPU *cpu, MEMORY *mem){
 			else if(f7 == F7_SRAI){
 				cpu->x[rd] = (int)cpu->x[rs1] >> (imm % 32); 
 			}
-			else exit(EXIT_FAILURE);
+			else {
+				perror("invalid f7: F3_SRI");
+				exit(EXIT_FAILURE);
+			}
 			break;
 		default:
+			perror("invalid f3: OP_LAI");
 			exit(EXIT_FAILURE);
 	}
 	}
@@ -237,6 +253,7 @@ void exec_LD(uint32_t instr, CPU *cpu, MEMORY *mem){
 			cpu->x[rd] = (uint32_t)data;
 			break;}
 		default:
+			perror("invalid f3: OP_LD");
 			exit(EXIT_FAILURE);
 	}
 	}
@@ -271,6 +288,7 @@ void exec_ST(uint32_t instr, CPU *cpu, MEMORY *mem){
 			endian_wrapper(mem->data + offset, &data, sizeof(int32_t));
 			break;}
 		default:
+			perror("invalid f3: OP_ST");
 			exit(EXIT_FAILURE);
 	}
 }
@@ -323,6 +341,7 @@ void exec_CB(uint32_t instr, CPU *cpu, MEMORY *mem){
 			else cpu->pc += 4;// pc = pc+4;
 			break;
 		default:
+			perror("invalid f3: OP_CB");
 			exit(EXIT_FAILURE);
 	}
 }

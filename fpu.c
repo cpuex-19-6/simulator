@@ -27,7 +27,10 @@ void exec_FLW(uint32_t instr, CPU *cpu, MEMORY *mem){
 	        endian_wrapper(&data, mem->data + offset, sizeof(float));
 		cpu->f[rd] = (float)data;
 	}
-	else exit(EXIT_FAILURE);
+	else {
+		perror("invalid f3: OP_FLW");
+		exit(EXIT_FAILURE);
+	}
 }
 
 //floating point store
@@ -45,7 +48,10 @@ void exec_FSW(uint32_t instr, CPU *cpu, MEMORY *mem){
 		float data = cpu->f[rs2];
 		endian_wrapper(mem->data + offset, &data, sizeof(float));
 	}
-	else exit(EXIT_FAILURE);
+	else {
+		perror("invalid f3: OP_FSW");
+		exit(EXIT_FAILURE);
+	}
 }
 
 //floating point sign injection
@@ -76,6 +82,7 @@ void exec_FSGNJ(int instr, CPU *cpu, MEMORY *mem){
 			cpu->f[rd] = *((float *)(&data)); 
 			break;
 		default:
+			perror("invalid f3: F7_FSGNJ");
 			exit(EXIT_FAILURE);
 	}
 }
@@ -106,7 +113,7 @@ void exec_FROUND(int instr, CPU *cpu, MEMORY *mem){
 			cpu->f[rd] = roundf(cpu->f[rs1]);
 			break;
 		default:
-			perror("invalid rounding mode");
+			perror("invalid rm: F7_FROUND");
 			exit(EXIT_FAILURE);
 	}
 }
@@ -119,7 +126,10 @@ void exec_TOF(uint32_t instr, CPU *cpu, MEMORY *mem){
 	int32_t rs1 = (int32_t)downto(instr, 19, 15);
 	int32_t rs2 = (int32_t)downto(instr, 24, 20);
 
-	if(f3 != F3_RM)exit(EXIT_FAILURE);
+	if(f3 != F3_RM){
+		perror("invalid rm: F7_TOF");
+		exit(EXIT_FAILURE);
+	}
 
 	switch(rs2){
 		case RS2_ITOF:{
@@ -131,6 +141,7 @@ void exec_TOF(uint32_t instr, CPU *cpu, MEMORY *mem){
 			cpu->f[rd] = (float)data;
 			break;}
 		default:
+			perror("invalid rs2: F7_TOF");
 			exit(EXIT_FAILURE);
 	}
 }
@@ -143,7 +154,10 @@ void exec_TOI(uint32_t instr, CPU *cpu, MEMORY *mem){
 	int32_t rs1 = (int32_t)downto(instr, 19, 15);
 	int32_t rs2 = (int32_t)downto(instr, 24, 20);
 
-	if(f3 != F3_RM)exit(EXIT_FAILURE);
+	if(f3 != F3_RM){
+		perror("invalid rm: F7_TOI");
+		exit(EXIT_FAILURE);
+	}
 
 	switch(rs2){
 		case RS2_FTOI:{
@@ -155,6 +169,7 @@ void exec_TOI(uint32_t instr, CPU *cpu, MEMORY *mem){
 			cpu->x[rd] = (uint32_t)data;
 			break;}
 		default:
+			perror("invalid rs2: F7_TOI");
 			exit(EXIT_FAILURE);
 	}
 }
@@ -181,6 +196,7 @@ void exec_FCOMPARE(uint32_t instr, CPU *cpu, MEMORY *mem){
 				cpu->x[rd] = (cpu->f[rs1] <= cpu->f[rs2])? 1 : 0;
 			break;
 		default:
+			perror("inavlid f3: F7_FCOMPARE");
 			exit(EXIT_FAILURE);
 	}
 }
@@ -196,27 +212,45 @@ void exec_FLA(uint32_t instr, CPU *cpu, MEMORY *mem){
 
 	switch(f7){
 		case F7_FADD:
-			if(f3 != F3_RM)exit(EXIT_FAILURE);
+			if(f3 != F3_RM){
+				perror("invalid rm: F7_FADD");
+				exit(EXIT_FAILURE);
+			}
 			cpu->f[rd] = cpu->f[rs1] + cpu->f[rs2];	
 			break;
 		case F7_FSUB:
-			if(f3 != F3_RM)exit(EXIT_FAILURE);
+			if(f3 != F3_RM){
+				perror("invalid rm: F7_FSUB");
+				exit(EXIT_FAILURE);
+			}
 			cpu->f[rd] = cpu->f[rs1] - cpu->f[rs2];	
 			break;
 		case F7_FMUL:
-			if(f3 != F3_RM)exit(EXIT_FAILURE);
+			if(f3 != F3_RM){
+				perror("invalid rm: F7_FMUL");
+				exit(EXIT_FAILURE);
+			}
 			cpu->f[rd] = cpu->f[rs1] * cpu->f[rs2];	
 			break;
 		case F7_FDIV:
-			if(f3 != F3_RM)exit(EXIT_FAILURE);
+			if(f3 != F3_RM){
+				perror("invalid rm: F7_FDIV");
+				exit(EXIT_FAILURE);
+			}
 			cpu->f[rd] = cpu->f[rs1] / cpu->f[rs2];	
 			break;
 		case F7_FSQRT:
-			if(f3 != F3_RM)exit(EXIT_FAILURE);
+			if(f3 != F3_RM){
+				perror("invalid rm: F7_FSQRT");
+				exit(EXIT_FAILURE);
+			}
 			if(rs2 == RS2_FSQRT){
 				cpu->f[rd] = sqrtf(cpu->f[rs1]);
 			}
-			else exit(EXIT_FAILURE);
+			else {
+				perror("invalid rs2: F7_FSQRT");
+				exit(EXIT_FAILURE);
+			}
 			break;
 		case F7_FSGNJ:
 			exec_FSGNJ(instr, cpu, mem);
@@ -231,14 +265,20 @@ void exec_FLA(uint32_t instr, CPU *cpu, MEMORY *mem){
 			exec_TOI(instr, cpu, mem);
 			break;
 		case F7_FMVI:
-			if(f3 != F3_FMVI)exit(EXIT_FAILURE);
+			if(f3 != F3_RM){
+				perror("invalid rm: F7_FMVI");
+				exit(EXIT_FAILURE);
+			}
 			if(rs2 == RS2_FMVI){
 				int tmp = cpu->x[rs1];
 				cpu->f[rd] = *((float *)(&tmp));
 			}
 			break;
 		case F7_IMVF:
-			if(f3 != F3_IMVF)exit(EXIT_FAILURE);
+			if(f3 != F3_RM){
+				perror("invalid rm: F7_IMVF");
+				exit(EXIT_FAILURE);
+			}
 			if(rs2 == RS2_IMVF){
 				if(rd != 0){
 					float tmp = cpu->f[rs1];
@@ -250,6 +290,7 @@ void exec_FLA(uint32_t instr, CPU *cpu, MEMORY *mem){
 			exec_FCOMPARE(instr, cpu, mem);
 			break;
 		default:
+			perror("invalid f7: OP_FLA");
 			exit(EXIT_FAILURE);
 	}
 }
@@ -263,7 +304,10 @@ void mnemonic_FLA(uint32_t instr, ASSEM *assem){
 
 	switch(f7){
 		case F7_FADD:
-			if(f3 != F3_RM)exit(EXIT_FAILURE);
+			if(f3 != F3_RM){
+				perror("invalid rm: F7_FADD");
+				exit(EXIT_FAILURE);
+			}
 			else{
 				assem->itype = R;
 				strcpy(assem->mnemonic, "fadd");
@@ -271,7 +315,10 @@ void mnemonic_FLA(uint32_t instr, ASSEM *assem){
 			}
 			break;
 		case F7_FSUB:
-			if(f3 != F3_RM)exit(EXIT_FAILURE);
+			if(f3 != F3_RM){
+				perror("invalid rm: F7_FSUB");
+				exit(EXIT_FAILURE);
+			}
 			else{
 				assem->itype = R;
 				strcpy(assem->mnemonic, "fsub");
@@ -279,7 +326,10 @@ void mnemonic_FLA(uint32_t instr, ASSEM *assem){
 			}
 			break;
 		case F7_FMUL:
-			if(f3 != F3_RM)exit(EXIT_FAILURE);
+			if(f3 != F3_RM){
+				perror("invalid rm: F7_FMUL");
+				exit(EXIT_FAILURE);
+			}
 			else{
 				assem->itype = R;
 				strcpy(assem->mnemonic, "fmul");
@@ -287,7 +337,10 @@ void mnemonic_FLA(uint32_t instr, ASSEM *assem){
 			}
 			break;
 		case F7_FDIV:
-			if(f3 != F3_RM)exit(EXIT_FAILURE);
+			if(f3 != F3_RM){
+				perror("invalid rm: F7_FDIV");
+				exit(EXIT_FAILURE);
+			}
 			else{
 				assem->itype = R;
 				strcpy(assem->mnemonic, "fdiv");
@@ -295,7 +348,10 @@ void mnemonic_FLA(uint32_t instr, ASSEM *assem){
 			}
 			break;
 		case F7_FSQRT:
-			if(f3 != F3_RM)exit(EXIT_FAILURE);
+			if(f3 != F3_RM){
+				perror("invalid rm: F7_FSQRT");
+				exit(EXIT_FAILURE);
+			}
 			if(rs2 == RS2_FSQRT){
 				assem->itype = R_sub;
 				strcpy(assem->mnemonic, "fsqrt");
@@ -317,6 +373,7 @@ void mnemonic_FLA(uint32_t instr, ASSEM *assem){
 					strcpy(assem->mnemonic, "fsgnjn");
 					break;
 				default:
+					perror("invalid f3: F7_FSGNJ");
 					exit(EXIT_FAILURE);
 			}
 			break;
@@ -339,7 +396,7 @@ void mnemonic_FLA(uint32_t instr, ASSEM *assem){
 					strcpy(assem->rm, "RMM");
 						break;
 					default:
-						perror("invalid rounding mode");
+						perror("invalid rm: F7_FSGNJ");
 						exit(EXIT_FAILURE);
 				}
 				assem->itype = R;
@@ -357,6 +414,7 @@ void mnemonic_FLA(uint32_t instr, ASSEM *assem){
 					strcpy(assem->mnemonic, "utof");
 					break;
 				default:
+					perror("invalid rs2: F7_TOF");
 					exit(EXIT_FAILURE);
 			}
 			break;
@@ -371,23 +429,38 @@ void mnemonic_FLA(uint32_t instr, ASSEM *assem){
 					strcpy(assem->mnemonic, "ftoui");
 					break;
 				default:
+					perror("invalid rs2: F7_TOI");
 					exit(EXIT_FAILURE);
 			}
 			break;
 		case F7_FMVI:
-			if(f3 != F3_FMVI)exit(EXIT_FAILURE);
+			if(f3 != F3_RM){
+				perror("invalid rm: F7_FMVI");
+				exit(EXIT_FAILURE);
+			}
 			if(rs2 == RS2_FMVI){
 				assem->itype = R_sub;
 				strcpy(assem->mnemonic, "fmvi");
 				strcpy(assem->reg, "fx");
 			}
+			else {
+				perror("invalid f3: OP_FMVI");
+				exit(EXIT_FAILURE);
+			}
 			break;
 		case F7_IMVF:
-			if(f3 != F3_IMVF)exit(EXIT_FAILURE);
+			if(f3 != F3_RM){
+				perror("invalid rm: F7_IMVF");
+				exit(EXIT_FAILURE);
+			}
 			if(rs2 == RS2_IMVF){
 				assem->itype = R_sub;
 				strcpy(assem->mnemonic, "imvf");
 				strcpy(assem->reg, "xf");
+			}
+			else {
+				perror("invalid f3: OP_FMVI");
+				exit(EXIT_FAILURE);
 			}
 			break;
 		case F7_FCOMPARE:
@@ -404,10 +477,12 @@ void mnemonic_FLA(uint32_t instr, ASSEM *assem){
 					strcpy(assem->mnemonic, "fle");
 					break;
 				default:
+					perror("invalid f3: F7_FCOMPARE");
 					exit(EXIT_FAILURE);
 			}
 			break;
 		default:
+			perror("invalid f7: OP_FLA");
 			exit(EXIT_FAILURE);
 	}
 }

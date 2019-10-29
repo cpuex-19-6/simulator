@@ -7,7 +7,7 @@ void state_init(STATE *state){
 }
 
 void print_state(STATE state){
-	printf("Analysed status\n");
+	printf("Analysed data\n");
 	putchar('\n');
 	printf("total executed instructions: %llu\n", state.instr_num);
 	putchar('\n');

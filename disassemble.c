@@ -24,6 +24,7 @@ void mnemonic_LA(uint32_t instr, ASSEM *assem){
 					strcpy(assem->mnemonic, "sub");
 					break;
 				default:
+					perror("invalid f7: F3_A");
 					exit(EXIT_FAILURE);
 			}
 			break;
@@ -36,6 +37,7 @@ void mnemonic_LA(uint32_t instr, ASSEM *assem){
 					strcpy(assem->mnemonic, "rem");
 					break;
 				default:
+					perror("invalid f7: F3_OR");
 					exit(EXIT_FAILURE);
 			}
 			break;
@@ -48,6 +50,7 @@ void mnemonic_LA(uint32_t instr, ASSEM *assem){
 					strcpy(assem->mnemonic, "remu");
 					break;
 				default:
+					perror("invalid f7: F3_AND");
 					exit(EXIT_FAILURE);
 			}
 			break;
@@ -60,6 +63,7 @@ void mnemonic_LA(uint32_t instr, ASSEM *assem){
 					strcpy(assem->mnemonic, "div");
 					break;
 				default:
+					perror("invalid f7: F3_XOR");
 					exit(EXIT_FAILURE);
 			}
 			break;
@@ -67,7 +71,10 @@ void mnemonic_LA(uint32_t instr, ASSEM *assem){
 			if(f7 == F7_SLL){
 				strcpy(assem->mnemonic, "sll");
 			}
-			else exit(EXIT_FAILURE);
+			else {
+				perror("invalid f7: F3_SL");
+				exit(EXIT_FAILURE);
+			}
 			break;
 		case F3_SR:
 			switch(f7){
@@ -81,10 +88,12 @@ void mnemonic_LA(uint32_t instr, ASSEM *assem){
 					strcpy(assem->mnemonic, "sra");
 					break;
 				default:
+					perror("invalid f7: F3_SL");
 					exit(EXIT_FAILURE);
 			}
 			break;
 		default:
+			perror("invalid f3: OP_LA");
 			exit(EXIT_FAILURE);
 	}
 }
@@ -110,7 +119,10 @@ void mnemonic_LAI(uint32_t instr, ASSEM *assem){
 			if(f7 == F7_SLLI){
 				strcpy(assem->mnemonic, "slli");
 			}
-			else exit(EXIT_FAILURE);
+			else {
+				perror("invalid f7: F3_SLI");
+				exit(EXIT_FAILURE);
+			}
 			break;
 		case F3_SRI:
 			if(f7 == F7_SRLI){
@@ -120,10 +132,13 @@ void mnemonic_LAI(uint32_t instr, ASSEM *assem){
 			else if(f7 == F7_SRAI){
 				strcpy(assem->mnemonic, "srai");
 			}
-			else exit(EXIT_FAILURE);
+			else {
+				perror("invalid f7: F3_SRI");
+				exit(EXIT_FAILURE);
+			}
 			break;
 		default:
-			perror("Unkown indtruction");
+			perror("invalid f3: OP_LA");
 			exit(EXIT_FAILURE);
 	}
 }
@@ -148,7 +163,7 @@ void mnemonic_LD(uint32_t instr, ASSEM *assem){
 			strcpy(assem->mnemonic, "lhu");
 			break;
 		default:
-			perror("Unkown indtruction");
+			perror("invalid f3: OP_LD");
 			exit(EXIT_FAILURE);
 	}
 }
@@ -167,7 +182,7 @@ void mnemonic_ST(uint32_t instr, ASSEM *assem){
 			strcpy(assem->mnemonic, "sw");
 			break;
 		default:
-			perror("Unkown indtruction");
+			perror("invalid f3: OP_ST");
 			exit(EXIT_FAILURE);
 	}
 }
@@ -195,7 +210,7 @@ void mnemonic_CB(uint32_t instr, ASSEM *assem){
 			strcpy(assem->mnemonic, "bgeu");
 			break;
 		default:
-			perror("Unkown indtruction");
+			perror("invalid f3: OP_CB");
 			exit(EXIT_FAILURE);
 	}
 }
@@ -213,7 +228,7 @@ void mnemonic_IN(uint32_t instr, ASSEM *assem){
 			strcpy(assem->reg, "f");
 			break;
 		default:
-			perror("invalid instruction");
+			perror("invalid f20: OP_IN");
 			exit(EXIT_FAILURE);
 	}
 }
@@ -225,7 +240,7 @@ void mnemonic_OUT(uint32_t instr, ASSEM *assem){
 	switch(f8){
 		case OUTW8:
 			if(f12 != OUTW12){
-				perror("invalid instruction");
+				perror("invalid f12: OUTW8");
 				exit(EXIT_FAILURE);
 			}
 			strcpy(assem->mnemonic, "outw");
@@ -233,14 +248,14 @@ void mnemonic_OUT(uint32_t instr, ASSEM *assem){
 			break;
 		case OUTB8:
 			if(f12 != OUTW12){
-				perror("invalid instruction");
+				perror("invalid f12: OUTB8");
 				exit(EXIT_FAILURE);
 			}
 			strcpy(assem->mnemonic, "outb");
 			strcpy(assem->reg, "x");
 			break;
 		default:
-			perror("invalid instruction");
+			perror("invalid f8: OP_OUT");
 			exit(EXIT_FAILURE);
 	}
 }
