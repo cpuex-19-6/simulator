@@ -5,7 +5,7 @@
 
 typedef struct assem_t {
 	INSTR_TYPE itype;
-	char reg[3];
+	char reg[4];
 	int32_t rd;
 	int32_t rs1;
 	int32_t rs2;
