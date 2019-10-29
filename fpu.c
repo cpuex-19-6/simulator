@@ -117,10 +117,11 @@ void exec_TOF(uint32_t instr, CPU *cpu, MEMORY *mem){
 
 	int32_t rd = (int32_t)downto(instr, 11, 7);
 	int32_t rs1 = (int32_t)downto(instr, 19, 15);
+	int32_t rs2 = (int32_t)downto(instr, 24, 20);
 
 	if(f3 != F3_RM)exit(EXIT_FAILURE);
 
-	switch(rs1){
+	switch(rs2){
 		case RS2_ITOF:{
 			int32_t data = cpu->x[rs1];
 			cpu->f[rd] = (float)data;
@@ -140,10 +141,11 @@ void exec_TOI(uint32_t instr, CPU *cpu, MEMORY *mem){
 
 	int32_t rd = (int32_t)downto(instr, 11, 7);
 	int32_t rs1 = (int32_t)downto(instr, 19, 15);
+	int32_t rs2 = (int32_t)downto(instr, 24, 20);
 
 	if(f3 != F3_RM)exit(EXIT_FAILURE);
 
-	switch(rs1){
+	switch(rs2){
 		case RS2_FTOI:{
 			float data = cpu->f[rs1];
 			cpu->x[rd] = (int32_t)data;

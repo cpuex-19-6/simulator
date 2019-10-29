@@ -85,7 +85,7 @@
 #define F3_FSGNJX 0b010 //fsgnjx
 #define F3_FSGNJN 0b001 //fsgnjn
 
-#define F7_FROUND 0b1000000 //froundrm
+#define F7_FROUND 0b0100000 //froundrm
 #define RM_RNE 0b000 //RNE
 #define RM_RTZ 0b001 //RTZ
 #define RM_RDN 0b010 //RDN
