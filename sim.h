@@ -11,6 +11,7 @@
 #include "memory.h"
 #include "option.h"
 #include "io.h"
+#include "analyse.h"
 
 typedef enum instr_type_t{
 	R,
@@ -26,10 +27,10 @@ typedef enum instr_type_t{
 
 int32_t immediate(uint32_t instr, INSTR_TYPE ip);
 
-void exec_instr(uint32_t instr, CPU *cpu, MEMORY *mem, IO *io);
+void exec_instr(uint32_t instr, CPU *cpu, MEMORY *mem, IO *io, STATE *state);
 uint32_t fetch(CPU *cpu, MEMORY *mem);
 
-int run_to_the_end(CPU *cpu, MEMORY *mem, IO *io, OPTION option);
-int step(CPU *cpu, MEMORY *mem, IO *io, OPTION *option);
+int run_to_the_end(CPU *cpu, MEMORY *mem, IO *io, OPTION option, STATE *state);
+int step(CPU *cpu, MEMORY *mem, IO *io, OPTION *option, STATE *state);
 
 #endif

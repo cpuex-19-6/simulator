@@ -13,6 +13,7 @@
 #include "disassemble.h"
 #include "option.h"
 #include "io.h"
+#include "analyse.h"
 
 //即値生成　無駄が多いが、仕様書と見た目が同じになるように
 int32_t immediate(uint32_t instr, INSTR_TYPE ip){
@@ -327,7 +328,9 @@ void exec_CB(uint32_t instr, CPU *cpu, MEMORY *mem){
 }
 
 //rd がゼロレジスタの時は代入させておいて最後に代入がいい?
-void exec_instr(uint32_t instr, CPU *cpu, MEMORY *mem, IO *io){
+void exec_instr(uint32_t instr, CPU *cpu, MEMORY *mem, IO *io, STATE *state){
+	state->instr_num++;
+
 	uint32_t opcd = downto(instr, 6, 0);
 	
 	switch(opcd){
@@ -416,12 +419,12 @@ uint32_t fetch(CPU *cpu, MEMORY *mem){
 	return next_instr;
 }
 
-int run_to_the_end(CPU *cpu, MEMORY *mem, IO *io, OPTION option){
+int run_to_the_end(CPU *cpu, MEMORY *mem, IO *io, OPTION option, STATE *state){
 	uint32_t instr = fetch(cpu, mem);
 	int bp;
 	
 	while(instr != 0){
-		exec_instr(instr, cpu, mem, io);
+		exec_instr(instr, cpu, mem, io, state);
 		if((option.to_the_end == 0 && (bp = bp_check(*cpu, option.breakpoint)))){
 			putchar('\n');
 			printf("stopped at pc: %d\n", bp);
@@ -433,13 +436,13 @@ int run_to_the_end(CPU *cpu, MEMORY *mem, IO *io, OPTION option){
 	return 1;
 }
 
-int step(CPU *cpu, MEMORY *mem, IO *io, OPTION *option){
+int step(CPU *cpu, MEMORY *mem, IO *io, OPTION *option, STATE *state){
 	uint32_t instr = fetch(cpu, mem);
 
 	if(instr != 0){
 		putchar('\n');
 		printf("pc: %d:", cpu->pc);
-		exec_instr(instr, cpu, mem, io);
+		exec_instr(instr, cpu, mem, io, state);
 
 		ASSEM assem;
 		//assem_init(&assem);
@@ -459,7 +462,7 @@ int step(CPU *cpu, MEMORY *mem, IO *io, OPTION *option){
 
 		if(option->step_n > 0){
 			option->step_n--;
-			return step(cpu, mem, io, option);
+			return step(cpu, mem, io, option, state);
 		}
 		else return 0;
 	}

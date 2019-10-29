@@ -9,17 +9,20 @@
 #include "option.h"
 #include "disassemble.h"
 #include "io.h"
+#include "analyse.h"
 
 int main(int argc, char *argv[]){
 	OPTION option;
 	CPU cpu;
 	MEMORY mem;
 	IO io;
+	STATE state;
 
 	option_init(&option);
 	cpu_init(&cpu);
 	mem_init(&mem);
 	io_init(&io);
+	state_init(&state);
 
 	option_set(argc - 1, argv + 1, &option);
 	mem_set(&mem, option);
@@ -33,10 +36,10 @@ int main(int argc, char *argv[]){
 
 		switch(option.mode){
 			case RUN:
-				if(run_to_the_end(&cpu, &mem, &io, option))quit = 1;
+				if(run_to_the_end(&cpu, &mem, &io, option, &state))quit = 1;
 				break;
 			case STEP:
-				if(step(&cpu, &mem, &io, &option))quit = 1;
+				if(step(&cpu, &mem, &io, &option, &state))quit = 1;
 				break;
 			default: //case QUIT:
 				quit = 1;
@@ -56,6 +59,8 @@ int main(int argc, char *argv[]){
 		putchar('\n');
 		print_mem(option.mem_print, mem);
 	}
+
+	print_state(state);
 
 	option_free(&option);
 	mem_free(&mem);
