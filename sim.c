@@ -357,22 +357,23 @@ void exec_instr(uint32_t instr, CPU *cpu, MEMORY *mem, IO *io){
 			int32_t rd = (int32_t)downto(instr, 11, 7);
 			int32_t imm = immediate(instr, U);
 			imm = imm & ((~0) << 2); // immediate wrapping
-			if(rd != 0)cpu->x[rd] = cpu->pc + imm; //pc = pc+imm
+			if(rd != 0)cpu->x[rd] = cpu->pc + imm; //rd = pc+imm
+			cpu->pc += 4;// pc = pc+4;
 			break;}
 		case OP_JAL: {
 			int32_t rd = (int32_t)downto(instr, 11, 7);
 			int32_t imm = immediate(instr, J);
 			imm = imm & ((~0) << 2); // immediate wrapping
-			if(rd != 0)cpu->x[rd] = cpu->pc + 4;// pc = pc+4;
-			cpu->pc += imm;
+			if(rd != 0)cpu->x[rd] = cpu->pc + 4;// rd = pc+4;
+			cpu->pc += imm; //pc = pc + imm
 			break;}
 		case OP_JALR: {
 			int32_t rd = (int32_t)downto(instr, 11, 7);
 			int32_t rs1 = (int32_t)downto(instr, 19, 15);
 			int32_t imm = immediate(instr, I);
-			if(rd != 0)cpu->x[rd] = cpu->pc + 4; // pc = pc+4;
+			if(rd != 0)cpu->x[rd] = cpu->pc + 4; // rd = pc+4;
 			int address = (cpu->x[rs1] + imm) & ((~0) << 2);
-			cpu->pc = address;
+			cpu->pc = address; //pc = rs1 + imm
 			break;}
 		case OP_CB: 
 			exec_CB(instr, cpu, mem);
