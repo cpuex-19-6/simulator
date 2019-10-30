@@ -270,8 +270,10 @@ void exec_FLA(uint32_t instr, CPU *cpu, MEMORY *mem){
 				exit(EXIT_FAILURE);
 			}
 			if(rs2 == RS2_FMVI){
-				int tmp = cpu->x[rs1];
-				cpu->f[rd] = *((float *)(&tmp));
+				if(rd != 0){
+					float tmp = cpu->f[rs1];
+					cpu->x[rd] = *((int *)(&tmp));
+				}
 			}
 			break;
 		case F7_IMVF:
@@ -280,10 +282,8 @@ void exec_FLA(uint32_t instr, CPU *cpu, MEMORY *mem){
 				exit(EXIT_FAILURE);
 			}
 			if(rs2 == RS2_IMVF){
-				if(rd != 0){
-					float tmp = cpu->f[rs1];
-					cpu->x[rd] = *((int *)(&tmp));
-				}
+				int tmp = cpu->x[rs1];
+				cpu->f[rd] = *((float *)(&tmp));
 			}
 			break;
 		case F7_FCOMPARE:
