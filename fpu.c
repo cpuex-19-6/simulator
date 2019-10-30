@@ -441,7 +441,7 @@ void mnemonic_FLA(uint32_t instr, ASSEM *assem){
 			if(rs2 == RS2_FMVI){
 				assem->itype = R_sub;
 				strcpy(assem->mnemonic, "fmvi");
-				strcpy(assem->reg, "fx");
+				strcpy(assem->reg, "xf");
 			}
 			else {
 				perror("invalid f3: OP_FMVI");
@@ -456,7 +456,7 @@ void mnemonic_FLA(uint32_t instr, ASSEM *assem){
 			if(rs2 == RS2_IMVF){
 				assem->itype = R_sub;
 				strcpy(assem->mnemonic, "imvf");
-				strcpy(assem->reg, "xf");
+				strcpy(assem->reg, "fx");
 			}
 			else {
 				perror("invalid f3: OP_FMVI");
