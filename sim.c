@@ -348,8 +348,6 @@ void exec_CB(uint32_t instr, CPU *cpu, MEMORY *mem){
 
 //rd がゼロレジスタの時は代入させておいて最後に代入がいい?
 void exec_instr(uint32_t instr, CPU *cpu, MEMORY *mem, IO *io, STATE *state){
-	state->instr_num++;
-
 	uint32_t opcd = downto(instr, 6, 0);
 	
 	switch(opcd){
@@ -427,6 +425,10 @@ void exec_instr(uint32_t instr, CPU *cpu, MEMORY *mem, IO *io, STATE *state){
 			perror("unkown instruction");
 			exit(EXIT_FAILURE);
 	}	
+	
+	int32_t rd = (int32_t)downto(instr, 11, 7);
+	state_update(state, *cpu, rd);
+
 }
 
 uint32_t fetch(CPU *cpu, MEMORY *mem){
