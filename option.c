@@ -9,6 +9,7 @@
 #include "memory.h"
 
 void option_init(OPTION *option){
+	option->cmd_in = stdin;
 	option->ftype_instr = BIN;
 	option->ftype_data = BIN;
 	option->ftype_output = BIN;
@@ -75,6 +76,16 @@ void option_set(int argn, char **arg, OPTION *option){
 						exit(EXIT_FAILURE);
 					}
 					 break;}
+				case 's':{ //use setup file
+					i++;
+					FILE *fp;
+					if((fp = fopen(arg[i], "r")) != NULL){
+						printf("using \"%s\" as setup file\n", arg[i]);
+						option->cmd_in= fp;
+					}
+					else
+						printf("failed to open setup file\n");
+					break;}
 				default:
 					perror("invalid option");
 					exit(EXIT_FAILURE);
@@ -90,6 +101,8 @@ void option_set(int argn, char **arg, OPTION *option){
 }
 
 void option_free(OPTION *option){
+	if(option->cmd_in != stdin && option->cmd_in != NULL)
+		fclose(option->cmd_in);
 	free(option->fname_instr);
 	free(option->fname_data);
 	free(option->fname_output);
@@ -105,13 +118,12 @@ char *read_space(char *s){
 	return s;
 }
 
-void command_parser(char *s, OPTION *option){
+int command_parser(char *s, OPTION *option){
 	int b = 0;
 
-	while(b == 0){
+	while(b == 0 && feof(option->cmd_in) == 0){
 
-		printf("simulator:>");
-		scanf("%s", s);	
+		if(fscanf(option->cmd_in, "%s", s) < 0)break;
 
 		switch(s[0]){
 			case 'r':{
@@ -124,7 +136,7 @@ void command_parser(char *s, OPTION *option){
 			case 's':{
 				if(s[1] == 'n'){
 					int d;
-					scanf("%d", &d);
+					fscanf(option->cmd_in, "%d", &d);
 					option->step_n = d;
 				}
 				option->mode = STEP;
@@ -136,7 +148,7 @@ void command_parser(char *s, OPTION *option){
 				break;
 			case 'x':{
 				int d;
-				scanf("%d", &d);
+				fscanf(option->cmd_in, "%d", &d);
 				option->reg = option->reg | (1 << d);
 				if(s[1] == 'x'){
 					option->reg16 = option->reg16 | (1 << d);
@@ -144,14 +156,14 @@ void command_parser(char *s, OPTION *option){
 				break;}
 			case 'f':{
 				int d;
-				scanf("%d", &d);
+				fscanf(option->cmd_in, "%d", &d);
 				option->freg = option->freg | (1 << d);
 				break;}
 			case 'b':{
 				if(option->breakpoint.bp == NULL)
 					option->breakpoint.bp = malloc(BP_NUM*sizeof(int));
 				int d;
-				scanf("%d", &d);
+				fscanf(option->cmd_in, "%d", &d);
 				option->breakpoint.num++;
 				option->breakpoint.bp[option->breakpoint.num -1] = d;
 				break;}
@@ -160,12 +172,12 @@ void command_parser(char *s, OPTION *option){
 					option->mem_print.mp = malloc(MP_NUM*sizeof(MEM_PRINT));
 				int d;
 				char c[2];
-				scanf("%s", c);
-				scanf("%d", &d);
+				fscanf(option->cmd_in, "%s", c);
+				fscanf(option->cmd_in, "%d", &d);
 				int i = option->mem_print.num;
 				int b = 0;
 
-				if(d < 0){
+				if(d < 0 || d >= DATA_MEM_SIZE){
 					printf("invalid address\n");
 					b = 1;
 				}
@@ -207,6 +219,15 @@ void command_parser(char *s, OPTION *option){
 				printf("invalid command\n");
 		}
 	}
+	return b;
+}
+
+int command_set(char *s, OPTION *option){
+	int ans = 0;
+	if(option->cmd_in != stdin && option->cmd_in != NULL){
+		ans = command_parser(s, option);
+	}
+	return ans;
 }
 
 void print_reg(OPTION option, CPU cpu){

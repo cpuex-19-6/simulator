@@ -31,7 +31,31 @@ int main(int argc, char *argv[]){
 	char s[COM_LEN];
 	int quit = 0;
 
+	printf("start setup\n\n");
+
 	while(quit == 0){
+		if(command_set(s, &option) != 0){
+
+			switch(option.mode){
+				case RUN:
+					if(run_to_the_end(&cpu, &mem, &io, option, &state))quit = 1;
+					break;
+				case STEP:
+					if(step(&cpu, &mem, &io, &option, &state))quit = 1;
+					break;
+				default: //case QUIT:
+					quit = 1;
+			}
+		}
+		else break;
+	}
+
+	printf("finished setup\n\n");
+
+	option.cmd_in = stdin;
+
+	while(quit == 0){
+		printf("simulator:>");
 		command_parser(s, &option);
 
 		switch(option.mode){
@@ -58,9 +82,8 @@ int main(int argc, char *argv[]){
 		}
 		putchar('\n');
 		print_mem(option.mem_print, mem);
+		print_state(state);
 	}
-
-	print_state(state);
 
 	option_free(&option);
 	mem_free(&mem);

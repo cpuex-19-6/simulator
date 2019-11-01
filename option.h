@@ -48,6 +48,7 @@ typedef struct break_point_t{
 }BREAKPOINT;
 
 typedef struct option_t {
+	FILE *cmd_in;
 	FTYPE ftype_instr;
 	FTYPE ftype_data;
 	FTYPE ftype_output;
@@ -68,7 +69,9 @@ void option_init(OPTION *option);
 void option_set(int argn, char **arg, OPTION *option);
 void option_free(OPTION *option);
 
-void command_parser(char *s, OPTION *option);
+int command_parser(char *s, OPTION *option);
+int command_set(char *s, OPTION *option);
+
 void print_reg(OPTION option, CPU cpu);
 void print_freg(OPTION option, CPU cpu);
 int bp_check(CPU cpu, BREAKPOINT breakpoint);
