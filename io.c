@@ -34,13 +34,13 @@ void io_set(IO *io, OPTION option){
 	}
 	if(option.fname_output != NULL){
 		if(option.ftype_output == BIN){
-			io->ftype_in = BIN;
+			io->ftype_out = BIN;
 			io->output = fopen(option.fname_output, "wb");
 			if(io->output == NULL)
 				printf("cannot open output file\n");
 		}
 		else{ //TXT
-			io->ftype_in = TXT;
+			io->ftype_out = TXT;
 			io->output = fopen(option.fname_output, "w");
 			if(io->output == NULL)
 				printf("cannot open output file\n");
@@ -72,7 +72,7 @@ void exec_IN(uint32_t instr, CPU *cpu, MEMORY *mem, IO *io){
 			}
 			else{ //TXT
 				char tmp[32];
-				n = fread(tmp, sizeof(char), sizeof(int32_t), io->input);
+				n = fread(tmp, sizeof(char), 32, io->input);
 				if(n <= 0)printf("failed to input\n");
 				c2b_32((uint32_t *)&data, tmp, sizeof(int32_t));
 				cpu->x[rd] = data;
@@ -87,7 +87,7 @@ void exec_IN(uint32_t instr, CPU *cpu, MEMORY *mem, IO *io){
 			}
 			else{ //TXT
 				char tmp[32];
-				n = fread(tmp, sizeof(char), sizeof(float), io->input);
+				n = fread(tmp, sizeof(char), 32, io->input);
 				if(n <= 0)printf("failed to input\n");
 				c2b_32((uint32_t *)&data, tmp, sizeof(float));
 				cpu->f[rd] = data;
@@ -113,6 +113,7 @@ void exec_OUT(uint32_t instr, CPU *cpu, MEMORY *mem, IO *io){
 				exit(EXIT_FAILURE);
 			}
 			int32_t data = cpu->x[rs1];
+
 			if(io->ftype_out  == BIN){
 				n = fwrite(&data, sizeof(int32_t), 1, io->output);
 				if( n <= 0)printf("failed to output\n");
@@ -120,7 +121,8 @@ void exec_OUT(uint32_t instr, CPU *cpu, MEMORY *mem, IO *io){
 			else{ //TXT
 				char tmp[32];
 				b2c_32(tmp, data);
-				fwrite(tmp, sizeof(char), sizeof(int32_t), io->output);
+				n = fwrite(tmp, sizeof(char), 32, io->output);
+				if( n <= 0)printf("failed to output\n");
 			}
 			break;}
 		case OUTB8:{
@@ -136,7 +138,8 @@ void exec_OUT(uint32_t instr, CPU *cpu, MEMORY *mem, IO *io){
 			else{ //TXT
 				char tmp[8];
 				b2c_8(tmp, data);
-				fwrite(tmp, sizeof(char), sizeof(int8_t), io->output);
+				n = fwrite(tmp, sizeof(char), 8, io->output);
+				if( n <= 0)printf("failed to output\n");
 			}
 			break;}
 		default:
