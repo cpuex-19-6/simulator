@@ -32,6 +32,10 @@ void io_set(IO *io, OPTION option){
 				printf("cannot open input file\n");
 		}
 	}
+	else {
+		printf("NO INPUT FILE!!!!\n");
+	}
+
 	if(option.fname_output != NULL){
 		if(option.ftype_output == BIN){
 			io->ftype_out = BIN;
@@ -45,6 +49,9 @@ void io_set(IO *io, OPTION option){
 			if(io->output == NULL)
 				printf("cannot open output file\n");
 		}
+	}
+	else {
+		printf("NO OUTPUT FILE!!!!\n");
 	}
 }
 
