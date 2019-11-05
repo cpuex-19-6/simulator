@@ -194,7 +194,7 @@ void print_mem(MEM_PRINT mem_print, MEMORY mem){
 }
 
 void address_check(int address){
-	if(address < 0 || address >= DATA_MEM_SIZE -1){
+	if(address < 0 || address >= DATA_MEM_SIZE){
 		printf("invalid memory access: address %d\n", address);
 		exit(EXIT_FAILURE);
 	}

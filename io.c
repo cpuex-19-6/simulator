@@ -11,7 +11,7 @@
 
 void io_init(IO *io){
 	io->input = NULL;
-	io->output = NULL;
+	io->output = stdout;
 	io->ftype_in = BIN;
 	io->ftype_out = BIN;
 }
