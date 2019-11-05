@@ -27,4 +27,6 @@ void load_data_txt(MEMORY *mem, char *filename); //load data from txt file to me
 
 void print_mem(MEM_PRINT mem_print, MEMORY mem);
 
+void address_check(int adderss);
+
 #endif

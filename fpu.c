@@ -21,6 +21,7 @@ void exec_FLW(uint32_t instr, CPU *cpu, MEMORY *mem){
 	int32_t imm = immediate(instr, I);
 
 	int offset = (cpu->x[rs1] + imm) & ((~0) << 2);
+	address_check(offset);
 
 	if(f3 == F3_FLW){
 		float data;
@@ -43,6 +44,7 @@ void exec_FSW(uint32_t instr, CPU *cpu, MEMORY *mem){
 	int32_t imm = immediate(instr, S);
 
 	int offset = (cpu->x[rs1] + imm) & ((~0) << 2);
+	address_check(offset);
 
 	if(f3 == F3_FSW){
 		float data = cpu->f[rs2];

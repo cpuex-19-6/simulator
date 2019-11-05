@@ -219,37 +219,48 @@ void exec_LD(uint32_t instr, CPU *cpu, MEMORY *mem){
 	int32_t imm = immediate(instr, I);
 
 	int offset;
+	uint8_t* address;
 
 	if(rd != 0){
 	switch(f3){
 		case F3_LB:{
 			offset = (cpu->x[rs1] + imm);
+			address_check(offset);
+			address = mem->data + offset;
 			int8_t data;
-		        endian_wrapper(&data, mem->data + offset, sizeof(int8_t));
+		        endian_wrapper(&data, address, sizeof(int8_t));
 			cpu->x[rd] = (int32_t)data;
 			break;}
 		case F3_LH:{
 			offset = (cpu->x[rs1] + imm) & ((~0) << 1);
+			address_check(offset);
+			address = mem->data + offset;
 			int16_t data;
-		        endian_wrapper(&data, mem->data + offset, sizeof(int16_t));
+		        endian_wrapper(&data, address, sizeof(int16_t));
 			cpu->x[rd] = (int32_t)data;
 			break;}
 		case F3_LW:{
 			offset = (cpu->x[rs1] + imm) & ((~0) << 2);
+			address_check(offset);
+			address = mem->data + offset;
 			int32_t data;
-		        endian_wrapper(&data, mem->data + offset, sizeof(int32_t));
+		        endian_wrapper(&data, address, sizeof(int32_t));
 			cpu->x[rd] = (int32_t)data;
 			break;}
 		case F3_LBU:{
 			offset = (cpu->x[rs1] + imm);
+			address_check(offset);
+			address = mem->data + offset;
 			uint8_t data;
-		        endian_wrapper(&data, mem->data + offset, sizeof(uint8_t));
+		        endian_wrapper(&data, address, sizeof(uint8_t));
 			cpu->x[rd] = (uint32_t)data;
 			break;}
 		case F3_LHU:{
 			offset = (cpu->x[rs1] + imm) & ((~0) << 1);
+			address_check(offset);
+			address = mem->data + offset;
 			uint16_t data;
-		        endian_wrapper (&data, mem->data + offset, sizeof(uint16_t));
+		        endian_wrapper (&data, address, sizeof(uint16_t));
 			cpu->x[rd] = (uint32_t)data;
 			break;}
 		default:
@@ -269,23 +280,30 @@ void exec_ST(uint32_t instr, CPU *cpu, MEMORY *mem){
 	int32_t imm = immediate(instr, S);
 
 	int offset;
+	uint8_t* address;
 
 	//これでちゃんと下位ビットを取れているのか
 	switch(f3){
 		case F3_SB:{
 			offset = (cpu->x[rs1] + imm);
+			address_check(offset);
+			address = mem->data + offset;
 			int8_t data = cpu->x[rs2];
-			endian_wrapper(mem->data + offset, &data, sizeof(int8_t));
+			endian_wrapper(address, &data, sizeof(int8_t));
 			break;}
 		case F3_SH:{
 			offset = (cpu->x[rs1] + imm) & ((~0) << 1);
+			address_check(offset);
+			address = mem->data + offset;
 			int16_t data = cpu->x[rs2];
-			endian_wrapper(mem->data + offset, &data, sizeof(int16_t));
+			endian_wrapper(address, &data, sizeof(int16_t));
 			break;}
 		case F3_SW:{
 			offset = (cpu->x[rs1] + imm) & ((~0) << 2);
+			address_check(offset);
+			address = mem->data + offset;
 			int32_t data = cpu->x[rs2];
-			endian_wrapper(mem->data + offset, &data, sizeof(int32_t));
+			endian_wrapper(address, &data, sizeof(int32_t));
 			break;}
 		default:
 			perror("invalid f3: OP_ST");
