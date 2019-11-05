@@ -37,20 +37,20 @@ void option_set(int argn, char **arg, OPTION *option){
 				case 't': //txt file
 					option->ftype_instr = TXT;
 					i++;
-					option->fname_instr = malloc(strlen(arg[i]));
+					option->fname_instr = malloc(strlen(arg[i]) + 1);
 					strcpy(option->fname_instr, arg[i]);
 					break;
 				case 'd': //data-file
 					if(arg[i][2] == 'b'){ //binary data file
 						option->ftype_data = BIN;
 						i++;
-						option->fname_data = malloc(strlen(arg[i]));
+						option->fname_data = malloc(strlen(arg[i]) + 1);
 						strcpy(option->fname_data, arg[i]);
 					}
 					else if(arg[i][2] == 't'){ //txt data file
 						option->ftype_data = TXT;
 						i++;
-						option->fname_data = malloc(strlen(arg[i]));
+						option->fname_data = malloc(strlen(arg[i]) + 1);
 						strcpy(option->fname_data, arg[i]);
 					}
 					else {
@@ -62,13 +62,13 @@ void option_set(int argn, char **arg, OPTION *option){
 					if(arg[i][2] == 'b'){ //binary output file
 						option->ftype_output = BIN;
 						i++;
-						option->fname_output = malloc(strlen(arg[i]));
+						option->fname_output = malloc(strlen(arg[i]) + 1);
 						strcpy(option->fname_output, arg[i]);
 					}
 					else if(arg[i][2] == 't'){ //txt data file
 						option->ftype_output = TXT;
 						i++;
-						option->fname_output = malloc(strlen(arg[i]));
+						option->fname_output = malloc(strlen(arg[i]) + 1);
 						strcpy(option->fname_output, arg[i]);
 					}
 					else {
@@ -93,7 +93,7 @@ void option_set(int argn, char **arg, OPTION *option){
 		}
 		else{ //instruction file is binary: default
 			option->ftype_instr = BIN;
-			option->fname_instr = malloc(strlen(arg[i]));
+			option->fname_instr = malloc(strlen(arg[i]) + 1);
 			strcpy(option->fname_instr, arg[i]);
 		}
 		i++; //increment arg
