@@ -120,8 +120,8 @@
 
 #define OP_OUT 0b0101011 //input
 #define OUTW12 0b000000000000 //outw
-#define OUTW8 0b00000000 //outw
+#define OUTW8 0b01000000 //outw
 #define OUTB12 0b000000000000 //outw
-#define OUTB8 0b01000000 //outw
+#define OUTB8 0b00000000 //outw
 
 #endif
