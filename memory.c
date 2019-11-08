@@ -4,12 +4,13 @@
 #include <stdlib.h>
 
 
+#include "struct.h"
 #include "functions.h"
-#include "option.h"
 #include "memory.h"
+#include "decode.h"
 
 void mem_init(MEMORY *mem){	
-	mem->instr = calloc(INSTR_MEM_SIZE, sizeof(uint8_t));
+	mem->instr = calloc(INSTR_MEM_SIZE, sizeof(INSTR));
 	mem->data = calloc(DATA_MEM_SIZE, sizeof(uint8_t));
 	memset(mem->instr, 0, sizeof(uint8_t)*INSTR_MEM_SIZE);
 	memset(mem->data, 0, sizeof(uint8_t)*DATA_MEM_SIZE);
@@ -22,23 +23,22 @@ void mem_set(MEMORY *mem, OPTION option){
 	}
 	else{
 		printf("using \"%s\" as instruction file\n", option.fname_instr);
-		if(option.ftype_instr == BIN){
-			load_instr(mem, option.fname_instr);
-		}
-		else{ //TXT
-			load_instr_txt(mem, option.fname_instr);
-		}
-	}
 
-	/*if(option.fname_data != NULL){
-		printf("using \"%s\" as data file\n", option.fname_data);
-		if(option.ftype_data == BIN){
-			load_data(mem, option.fname_data);
+		int n = 0;
+		uint32_t *tmp;
+		tmp = calloc(INSTR_MEM_SIZE/4, sizeof(uint32_t));
+
+		if(option.ftype_instr == BIN){
+			n = load_instr(tmp, option.fname_instr); //loaded instructions
+			decode(tmp, n, mem);
 		}
 		else{ //TXT
-			load_data_txt(mem, option.fname_data);
+			n = load_instr_txt(tmp, option.fname_instr); //loaded bits of instructions
+			n = n/32;
+			decode(tmp, n, mem);
 		}
-	}*/
+		printf("loaded instructions: %d\n", n);
+	}
 }
 
 void mem_free(MEMORY *mem){
@@ -46,7 +46,7 @@ void mem_free(MEMORY *mem){
 	free(mem->data);
 }
 
-void load_instr(MEMORY *mem, char *filename){
+int load_instr(uint32_t *instr, char *filename){
 	FILE *fp;
 	if ((fp = fopen(filename, "rb")) == NULL){
 		perror("failed to open file: bin");
@@ -54,17 +54,19 @@ void load_instr(MEMORY *mem, char *filename){
 	}	
 	int n = 0;
 
-	if ((n = fread(mem->instr, sizeof(uint8_t), INSTR_MEM_SIZE, fp)) == 0){ 
+	if ((n = fread(instr, sizeof(uint32_t), INSTR_MEM_SIZE/4, fp)) == 0){ 
 	/*サイズとかあってる?ファイルサイズを取得するべき？*/
 		perror("failed to load instructions to memory");
 		exit(EXIT_FAILURE);
 	}
-	printf("loaded size : %d byte\n", n);
+	printf("loaded size : %d byte\n", n*4);
 	
 	fclose(fp);
+
+	return n; //return loaded instruciton bytes
 }
 
-void load_instr_txt(MEMORY *mem, char *filename){
+int load_instr_txt(uint32_t *instr, char *filename){
 	FILE *fp;
 	if((fp = fopen(filename, "r")) == NULL){
 		perror("failed to open file: txt");
@@ -74,54 +76,17 @@ void load_instr_txt(MEMORY *mem, char *filename){
 	tmp = malloc(INSTR_MEM_SIZE*8);
 	int n = 0;
 	
-	if((n = fread(tmp, sizeof(char), INSTR_MEM_SIZE * 8, fp)) == 0){ //read and load txt data
+	if((n = fread(tmp, sizeof(char), INSTR_MEM_SIZE * 9, fp)) == 0){ //read and load txt data, テキストファイルを読むのでちょっと多めに読んでる。
 		perror("failed to load txt instructions");
 		exit(EXIT_FAILURE);
 	}
-	c2b_8(mem->instr, tmp, n); //convert txt data to binary
-	//c2b_32(mem->instr, tmp, n); //convert txt data to binary
 	printf("loaded size : %d byte\n", n);
+	int ans = c2b_32(instr, tmp, n); //convert txt data to binary
 
 	free(tmp);
 	fclose(fp);
-}
 
-void load_data(MEMORY *mem, char *filename){
-	FILE *fp;
-	if ((fp = fopen(filename, "rb")) == NULL){
-		perror("failed to open file");
-		exit(EXIT_FAILURE);
-	}	
-	int n = 0;
-
-	if ((n = fread(mem->data, sizeof(uint8_t), DATA_MEM_SIZE, fp)) == 0){ 
-	/*サイズとかあってる?ファイルサイズを取得するべき？*/
-		perror("failed to load data to memory");
-		exit(EXIT_FAILURE);
-	}
-	printf("loaded size : %d byte\n", n);
-	
-	fclose(fp);
-}
-
-void load_data_txt(MEMORY *mem, char *filename){
-	FILE *fp;
-	if((fp = fopen(filename, "r")) == NULL){
-		perror("failed to open file");
-		exit(EXIT_FAILURE);
-	}
-	
-	char *tmp;
-	tmp = malloc(DATA_MEM_SIZE*8);
-	int n = 0;
-	
-	if((n = fread(tmp, sizeof(char), DATA_MEM_SIZE * 8, fp)) == 0){
-		perror("failed to load txt data");
-		exit(EXIT_FAILURE);
-	}
-	printf("loaded size : %d byte\n", n);
-	c2b_8(mem->data, tmp, n);
-	fclose(fp);
+	return ans; //return loaded instruciton bytes
 }
 
 void print_mem_sub(MEM_PRINT_SUB mp, MEMORY mem){

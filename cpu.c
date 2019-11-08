@@ -2,6 +2,7 @@
 #include <stdint.h>
 #include <string.h>
 
+#include "struct.h"
 #include "cpu.h"
 #include "memory.h"
 

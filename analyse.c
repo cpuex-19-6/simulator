@@ -1,8 +1,8 @@
 #include <stdio.h>
 
+#include "struct.h"
 #include "analyse.h"
 #include "memory.h"
-#include "cpu.h"
 
 void state_init(STATE *state){
 	state->instr_num = 0;

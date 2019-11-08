@@ -5,28 +5,27 @@
 #include <math.h>
 #include <fenv.h>
 
+#include "struct.h"
 #include "functions.h"
-#include "cpu.h"
+#include "instruction.h"
+#include "decode.h"
 #include "memory.h"
-#include "sim.h"
-#include "disassemble.h"
 #include "fpu.h"
 
 //floating point load
-void exec_FLW(uint32_t instr, CPU *cpu, MEMORY *mem){
+void decode_FLW(uint32_t instr, INSTR *imp){
 	uint32_t f3 = downto(instr, 14, 12);
 
 	int32_t rd = (int32_t)downto(instr, 11, 7);
 	int32_t rs1 = (int32_t)downto(instr, 19, 15);
 	int32_t imm = immediate(instr, I);
 
-	int offset = (cpu->x[rs1] + imm) & ((~0) << 2);
-	address_check(offset);
+	imp->rd_or_imm = rd;
+	imp->rs1 = rs1;
+	imp->rs2_or_imm = imm;
 
 	if(f3 == F3_FLW){
-		float data;
-	        endian_wrapper(&data, mem->data + offset, sizeof(float));
-		cpu->f[rd] = (float)data;
+		imp->op = FLW;
 	}
 	else {
 		perror("invalid f3: OP_FLW");
@@ -35,20 +34,19 @@ void exec_FLW(uint32_t instr, CPU *cpu, MEMORY *mem){
 }
 
 //floating point store
-void exec_FSW(uint32_t instr, CPU *cpu, MEMORY *mem){
+void decode_FSW(uint32_t instr, INSTR *imp){
 	uint32_t f3 = downto(instr, 14, 12);
 
 	int32_t rs1 = (int32_t)downto(instr, 19, 15);
 	int32_t rs2 = (int32_t)downto(instr, 24, 20);
-
 	int32_t imm = immediate(instr, S);
 
-	int offset = (cpu->x[rs1] + imm) & ((~0) << 2);
-	address_check(offset);
+	imp->rd_or_imm = imm;
+	imp->rs1 = rs1;
+	imp->rs2_or_imm = rs2;
 
 	if(f3 == F3_FSW){
-		float data = cpu->f[rs2];
-		endian_wrapper(mem->data + offset, &data, sizeof(float));
+		imp->op = FSW;
 	}
 	else {
 		perror("invalid f3: OP_FSW");
@@ -57,31 +55,26 @@ void exec_FSW(uint32_t instr, CPU *cpu, MEMORY *mem){
 }
 
 //floating point sign injection
-void exec_FSGNJ(int instr, CPU *cpu, MEMORY *mem){
+void decode_FSGNJ(int instr, INSTR *imp){
 	uint32_t f3 = downto(instr, 14, 12);
 
 	int32_t rd = (int32_t)downto(instr, 11, 7);
 	int32_t rs1 = (int32_t)downto(instr, 19, 15);
 	int32_t rs2 = (int32_t)downto(instr, 24, 20);
 
-	int r1 = *((int *)(cpu->f + rs1));
-	int r2 = *((int *)(cpu->f + rs2));
-
-	int sign = r2 & (1 << 31);
-	int data;
+	imp->rd_or_imm = rd;
+	imp->rs1 = rs1;
+	imp->rs2_or_imm = rs2;
 
 	switch(f3){
 		case F3_FSGNJ:
-			data = (r1 & (~(1 << 31))) | sign;
-			cpu->f[rd] = *((float *)(&data)); 
+			imp->op = FSGNJ;
 			break;
 		case F3_FSGNJX:
-			data = r1 ^ sign;
-			cpu->f[rd] = *((float *)(&data)); 
+			imp->op = FSGNJX;
 			break;
 		case F3_FSGNJN:
-			data = (r1 | (1 << 31)) & ~sign;
-			cpu->f[rd] = *((float *)(&data)); 
+			imp->op = FSGNJN;
 			break;
 		default:
 			perror("invalid f3: F7_FSGNJ");
@@ -89,30 +82,31 @@ void exec_FSGNJ(int instr, CPU *cpu, MEMORY *mem){
 	}
 }
 
-void exec_FROUND(int instr, CPU *cpu, MEMORY *mem){
+void decode_FROUND(int instr, INSTR *imp){
 	uint32_t rm = downto(instr, 14, 12);
 
 	int32_t rd = (int32_t)downto(instr, 11, 7);
 	int32_t rs1 = (int32_t)downto(instr, 19, 15);
+	
+	imp->rd_or_imm = rd;
+	imp->rs1 = rs1;
+	//imp->rs2 = rm;
 
 	switch(rm){
 		case RM_RNE:
-			fesetround(FE_TONEAREST);
-			cpu->f[rd] = nearbyint(cpu->f[rs1]);
+			imp->op = FROUNDRM_RNE;
 			break;
 		case RM_RTZ:
-			fesetround(FE_TOWARDZERO);
-			cpu->f[rd] = nearbyint(cpu->f[rs1]);
-			break;
+			imp->op = FROUNDRM_RTZ;
 			break;
 		case RM_RDN:
-			cpu->f[rd] = floorf(cpu->f[rs1]);
+			imp->op = FROUNDRM_RDN;
 			break;
 		case RM_RUP:
-			cpu->f[rd] = ceilf(cpu->f[rs1]);
+			imp->op = FROUNDRM_RUP;
 			break;
 		case RM_RMM:
-			cpu->f[rd] = roundf(cpu->f[rs1]);
+			imp->op = FROUNDRM_RMM;
 			break;
 		default:
 			perror("invalid rm: F7_FROUND");
@@ -121,12 +115,16 @@ void exec_FROUND(int instr, CPU *cpu, MEMORY *mem){
 }
 
 //convert integer to float
-void exec_TOF(uint32_t instr, CPU *cpu, MEMORY *mem){
+void decode_TOF(uint32_t instr, INSTR *imp){
 	uint32_t f3 = downto(instr, 14, 12);
 
 	int32_t rd = (int32_t)downto(instr, 11, 7);
 	int32_t rs1 = (int32_t)downto(instr, 19, 15);
 	int32_t rs2 = (int32_t)downto(instr, 24, 20);
+
+	imp->rd_or_imm = rd;
+	imp->rs1 = rs1;
+	imp->rs2_or_imm = rs2;
 
 	if(f3 != F3_RM){
 		perror("invalid rm: F7_TOF");
@@ -134,14 +132,12 @@ void exec_TOF(uint32_t instr, CPU *cpu, MEMORY *mem){
 	}
 
 	switch(rs2){
-		case RS2_ITOF:{
-			int32_t data = cpu->x[rs1];
-			cpu->f[rd] = (float)data;
-			break;}
-		case RS2_UTOF:{
-			uint32_t data = cpu->x[rs1];
-			cpu->f[rd] = (float)data;
-			break;}
+		case RS2_ITOF:
+			imp->op = ITOF;
+			break;
+		/*case RS2_UTOF:
+			imp->op = UTOF;
+			break;*/
 		default:
 			perror("invalid rs2: F7_TOF");
 			exit(EXIT_FAILURE);
@@ -149,12 +145,16 @@ void exec_TOF(uint32_t instr, CPU *cpu, MEMORY *mem){
 }
 
 //convert float to integer
-void exec_TOI(uint32_t instr, CPU *cpu, MEMORY *mem){
+void decode_TOI(uint32_t instr, INSTR *imp){
 	uint32_t f3 = downto(instr, 14, 12);
 
 	int32_t rd = (int32_t)downto(instr, 11, 7);
 	int32_t rs1 = (int32_t)downto(instr, 19, 15);
 	int32_t rs2 = (int32_t)downto(instr, 24, 20);
+
+	imp->rd_or_imm = rd;
+	imp->rs1 = rs1;
+	imp->rs2_or_imm = rs2;
 
 	if(f3 != F3_RM){
 		perror("invalid rm: F7_TOI");
@@ -162,14 +162,12 @@ void exec_TOI(uint32_t instr, CPU *cpu, MEMORY *mem){
 	}
 
 	switch(rs2){
-		case RS2_FTOI:{
-			float data = cpu->f[rs1];
-			cpu->x[rd] = (int32_t)data;
-			break;}
-		case RS2_FTOUI:{
-			float data = cpu->f[rs1];
-			cpu->x[rd] = (uint32_t)data;
-			break;}
+		case RS2_FTOI:
+			imp->op = FTOI;
+			break;
+		/*case RS2_FTOUI:
+			imp->op = FTOUI;
+			break;*/
 		default:
 			perror("invalid rs2: F7_TOI");
 			exit(EXIT_FAILURE);
@@ -177,25 +175,26 @@ void exec_TOI(uint32_t instr, CPU *cpu, MEMORY *mem){
 }
 
 //floating point compare
-void exec_FCOMPARE(uint32_t instr, CPU *cpu, MEMORY *mem){
+void decode_FCOMPARE(uint32_t instr, INSTR *imp){
 	uint32_t f3 = downto(instr, 14, 12);
 
 	int32_t rd = (int32_t)downto(instr, 11, 7);
 	int32_t rs1 = (int32_t)downto(instr, 19, 15);
 	int32_t rs2 = (int32_t)downto(instr, 24, 20);
 
+	imp->rd_or_imm = rd;
+	imp->rs1 = rs1;
+	imp->rs2_or_imm = rs2;
+
 	switch(f3){
 		case F3_FEQ:
-			if(rd != 0)
-				cpu->x[rd] = (cpu->f[rs1] == cpu->f[rs2])? 1 : 0;
+			imp->op = FEQ;
 			break;
 		case F3_FLT:
-			if(rd != 0)
-				cpu->x[rd] = (cpu->f[rs1] < cpu->f[rs2])? 1 : 0;
+			imp->op = FLT;
 			break;
 		case F3_FLE:
-			if(rd != 0)
-				cpu->x[rd] = (cpu->f[rs1] <= cpu->f[rs2])? 1 : 0;
+			imp->op = FLE;
 			break;
 		default:
 			perror("inavlid f3: F7_FCOMPARE");
@@ -204,7 +203,7 @@ void exec_FCOMPARE(uint32_t instr, CPU *cpu, MEMORY *mem){
 }
 
 //floating point arithmetic logic and others
-void exec_FLA(uint32_t instr, CPU *cpu, MEMORY *mem){
+void decode_FLA(uint32_t instr, INSTR *imp){
 	uint32_t f3 = downto(instr, 14, 12);
 	uint32_t f7 = downto(instr, 31, 25);
 
@@ -218,28 +217,40 @@ void exec_FLA(uint32_t instr, CPU *cpu, MEMORY *mem){
 				perror("invalid rm: F7_FADD");
 				exit(EXIT_FAILURE);
 			}
-			cpu->f[rd] = cpu->f[rs1] + cpu->f[rs2];	
+			imp->op = FADD;
+			imp->rd_or_imm = rd;
+			imp->rs1 = rs1;
+			imp->rs2_or_imm = rs2;
 			break;
 		case F7_FSUB:
 			if(f3 != F3_RM){
 				perror("invalid rm: F7_FSUB");
 				exit(EXIT_FAILURE);
 			}
-			cpu->f[rd] = cpu->f[rs1] - cpu->f[rs2];	
+			imp->op = FSUB;
+			imp->rd_or_imm = rd;
+			imp->rs1 = rs1;
+			imp->rs2_or_imm = rs2;
 			break;
 		case F7_FMUL:
 			if(f3 != F3_RM){
 				perror("invalid rm: F7_FMUL");
 				exit(EXIT_FAILURE);
 			}
-			cpu->f[rd] = cpu->f[rs1] * cpu->f[rs2];	
+			imp->op = FMUL;
+			imp->rd_or_imm = rd;
+			imp->rs1 = rs1;
+			imp->rs2_or_imm = rs2;
 			break;
 		case F7_FDIV:
 			if(f3 != F3_RM){
 				perror("invalid rm: F7_FDIV");
 				exit(EXIT_FAILURE);
 			}
-			cpu->f[rd] = cpu->f[rs1] / cpu->f[rs2];	
+			imp->op = FDIV;
+			imp->rd_or_imm = rd;
+			imp->rs1 = rs1;
+			imp->rs2_or_imm = rs2;
 			break;
 		case F7_FSQRT:
 			if(f3 != F3_RM){
@@ -247,7 +258,9 @@ void exec_FLA(uint32_t instr, CPU *cpu, MEMORY *mem){
 				exit(EXIT_FAILURE);
 			}
 			if(rs2 == RS2_FSQRT){
-				cpu->f[rd] = sqrtf(cpu->f[rs1]);
+				imp->op = FSQRT;
+				imp->rd_or_imm = rd;
+				imp->rs1 = rs1;
 			}
 			else {
 				perror("invalid rs2: F7_FSQRT");
@@ -255,16 +268,16 @@ void exec_FLA(uint32_t instr, CPU *cpu, MEMORY *mem){
 			}
 			break;
 		case F7_FSGNJ:
-			exec_FSGNJ(instr, cpu, mem);
+			decode_FSGNJ(instr, imp);
 			break;
 		case F7_FROUND:
-			exec_FROUND(instr, cpu, mem);
+			decode_FROUND(instr, imp);
 			break;
 		case F7_TOF:
-			exec_TOF(instr, cpu, mem);
+			decode_TOF(instr, imp);
 			break;
 		case F7_TOI:
-			exec_TOI(instr, cpu, mem);
+			decode_TOI(instr, imp);
 			break;
 		case F7_FMVI:
 			if(f3 != F3_RM){
@@ -272,10 +285,9 @@ void exec_FLA(uint32_t instr, CPU *cpu, MEMORY *mem){
 				exit(EXIT_FAILURE);
 			}
 			if(rs2 == RS2_FMVI){
-				if(rd != 0){
-					float tmp = cpu->f[rs1];
-					cpu->x[rd] = *((int *)(&tmp));
-				}
+				imp->op = FMVI;
+				imp->rd_or_imm = rd;
+				imp->rs1 = rs1;
 			}
 			break;
 		case F7_IMVF:
@@ -284,12 +296,13 @@ void exec_FLA(uint32_t instr, CPU *cpu, MEMORY *mem){
 				exit(EXIT_FAILURE);
 			}
 			if(rs2 == RS2_IMVF){
-				int tmp = cpu->x[rs1];
-				cpu->f[rd] = *((float *)(&tmp));
+				imp->op = FMVI;
+				imp->rd_or_imm = rd;
+				imp->rs1 = rs1;
 			}
 			break;
 		case F7_FCOMPARE:
-			exec_FCOMPARE(instr, cpu, mem);
+			decode_FCOMPARE(instr, imp);
 			break;
 		default:
 			perror("invalid f7: OP_FLA");
@@ -297,195 +310,335 @@ void exec_FLA(uint32_t instr, CPU *cpu, MEMORY *mem){
 	}
 }
 
-//floating point arithmetic logic and others mnemonic
-void mnemonic_FLA(uint32_t instr, ASSEM *assem){
-	uint32_t f3 = downto(instr, 14, 12);
-	uint32_t f7 = downto(instr, 31, 25);
+//floating point load
+void exec_FLW(INSTR instr, CPU *cpu, MEMORY *mem){
+	int32_t rd = instr.rd_or_imm;
+	int32_t rs1 = instr.rs1;
+	int32_t imm = instr.rs2_or_imm;
 
-	int32_t rs2 = (int32_t)downto(instr, 24, 20);
+	int offset = (cpu->x[rs1] + imm) & ((~0) << 2);
+	address_check(offset);
 
-	switch(f7){
-		case F7_FADD:
-			if(f3 != F3_RM){
-				perror("invalid rm: F7_FADD");
-				exit(EXIT_FAILURE);
-			}
-			else{
-				assem->itype = R;
-				strcpy(assem->mnemonic, "fadd");
-				strcpy(assem->reg, "fff");
-			}
+	//このチェックはいらない
+	if(instr.op == FLW){
+		float data;
+	        endian_wrapper(&data, mem->data + offset, sizeof(float));
+		cpu->f[rd] = (float)data;
+	}
+	else {
+		perror("exec_FLW: invalid instruction");
+		exit(EXIT_FAILURE);
+	}
+}
+
+//floating point store
+void exec_FSW(INSTR instr, CPU *cpu, MEMORY *mem){
+	int32_t rs1 = instr.rs1;
+	int32_t rs2 = instr.rs2_or_imm;
+	int32_t imm = instr.rd_or_imm;
+
+	int offset = (cpu->x[rs1] + imm) & ((~0) << 2);
+	address_check(offset);
+
+	//このチェックはいらない
+	if(instr.op == FSW){
+		float data = cpu->f[rs2];
+		endian_wrapper(mem->data + offset, &data, sizeof(float));
+	}
+	else {
+		perror("exec_FSW: invalid instruction");
+		exit(EXIT_FAILURE);
+	}
+}
+
+//floating point sign injection
+void exec_FSGNJ(INSTR instr, CPU *cpu, MEMORY *mem){
+	int32_t rd = instr.rd_or_imm;
+	int32_t rs1 = instr.rs1;
+	int32_t rs2 = instr.rs2_or_imm;
+
+	int r1 = *((int *)(cpu->f + rs1));
+	int r2 = *((int *)(cpu->f + rs2));
+
+	int sign = r2 & (1 << 31);
+	int data;
+
+	switch(instr.op){
+		case FSGNJ:
+			data = (r1 & (~(1 << 31))) | sign;
+			cpu->f[rd] = *((float *)(&data)); 
 			break;
-		case F7_FSUB:
-			if(f3 != F3_RM){
-				perror("invalid rm: F7_FSUB");
-				exit(EXIT_FAILURE);
-			}
-			else{
-				assem->itype = R;
-				strcpy(assem->mnemonic, "fsub");
-				strcpy(assem->reg, "fff");
-			}
+		case FSGNJX:
+			data = r1 ^ sign;
+			cpu->f[rd] = *((float *)(&data)); 
 			break;
-		case F7_FMUL:
-			if(f3 != F3_RM){
-				perror("invalid rm: F7_FMUL");
-				exit(EXIT_FAILURE);
-			}
-			else{
-				assem->itype = R;
-				strcpy(assem->mnemonic, "fmul");
-				strcpy(assem->reg, "fff");
-			}
-			break;
-		case F7_FDIV:
-			if(f3 != F3_RM){
-				perror("invalid rm: F7_FDIV");
-				exit(EXIT_FAILURE);
-			}
-			else{
-				assem->itype = R;
-				strcpy(assem->mnemonic, "fdiv");
-				strcpy(assem->reg, "fff");
-			}
-			break;
-		case F7_FSQRT:
-			if(f3 != F3_RM){
-				perror("invalid rm: F7_FSQRT");
-				exit(EXIT_FAILURE);
-			}
-			if(rs2 == RS2_FSQRT){
-				assem->itype = R_sub;
-				strcpy(assem->mnemonic, "fsqrt");
-				strcpy(assem->reg, "ff");
-			}
-			else exit(EXIT_FAILURE);
-			break;
-		case F7_FSGNJ:
-			assem->itype = R;
-			strcpy(assem->reg, "fff");
-			switch(f3){
-				case F3_FSGNJ:
-					strcpy(assem->mnemonic, "fsgnj");
-					break;
-				case F3_FSGNJX:
-					strcpy(assem->mnemonic, "fsgnjx");
-					break;
-				case F3_FSGNJN:
-					strcpy(assem->mnemonic, "fsgnjn");
-					break;
-				default:
-					perror("invalid f3: F7_FSGNJ");
-					exit(EXIT_FAILURE);
-			}
-			break;
-		case F7_FROUND:
-			if(rs2 == RS2_FROUND){
-				switch(f3){
-					case RM_RNE:
-					strcpy(assem->rm, "RNE");
-						break;
-					case RM_RTZ:
-					strcpy(assem->rm, "RTZ");
-						break;
-					case RM_RDN:
-					strcpy(assem->rm, "RDN");
-						break;
-					case RM_RUP:
-					strcpy(assem->rm, "RUP");
-						break;
-					case RM_RMM:
-					strcpy(assem->rm, "RMM");
-						break;
-					default:
-						perror("invalid rm: F7_FSGNJ");
-						exit(EXIT_FAILURE);
-				}
-				assem->itype = R;
-				strcpy(assem->mnemonic, "froundrm");
-				strcpy(assem->reg, "ff");
-			}
-		case F7_TOF:
-			assem->itype = R_sub;
-			strcpy(assem->reg, "fx");
-			switch(rs2){
-				case RS2_ITOF:
-					strcpy(assem->mnemonic, "itof");
-					break;
-				case RS2_UTOF:
-					strcpy(assem->mnemonic, "utof");
-					break;
-				default:
-					perror("invalid rs2: F7_TOF");
-					exit(EXIT_FAILURE);
-			}
-			break;
-		case F7_TOI:
-			assem->itype = R_sub;
-			strcpy(assem->reg, "xf");
-			switch(rs2){
-				case RS2_FTOI:
-					strcpy(assem->mnemonic, "ftoi");
-					break;
-				case RS2_FTOUI:
-					strcpy(assem->mnemonic, "ftoui");
-					break;
-				default:
-					perror("invalid rs2: F7_TOI");
-					exit(EXIT_FAILURE);
-			}
-			break;
-		case F7_FMVI:
-			if(f3 != F3_RM){
-				perror("invalid rm: F7_FMVI");
-				exit(EXIT_FAILURE);
-			}
-			if(rs2 == RS2_FMVI){
-				assem->itype = R_sub;
-				strcpy(assem->mnemonic, "fmvi");
-				strcpy(assem->reg, "xf");
-			}
-			else {
-				perror("invalid f3: OP_FMVI");
-				exit(EXIT_FAILURE);
-			}
-			break;
-		case F7_IMVF:
-			if(f3 != F3_RM){
-				perror("invalid rm: F7_IMVF");
-				exit(EXIT_FAILURE);
-			}
-			if(rs2 == RS2_IMVF){
-				assem->itype = R_sub;
-				strcpy(assem->mnemonic, "imvf");
-				strcpy(assem->reg, "fx");
-			}
-			else {
-				perror("invalid f3: OP_FMVI");
-				exit(EXIT_FAILURE);
-			}
-			break;
-		case F7_FCOMPARE:
-			assem->itype = R;
-			strcpy(assem->reg, "xff");
-			switch(f3){
-				case F3_FEQ:
-					strcpy(assem->mnemonic, "feq");
-					break;
-				case F3_FLT:
-					strcpy(assem->mnemonic, "flt");
-					break;
-				case F3_FLE:
-					strcpy(assem->mnemonic, "fle");
-					break;
-				default:
-					perror("invalid f3: F7_FCOMPARE");
-					exit(EXIT_FAILURE);
-			}
+		case FSGNJN:
+			data = (r1 | (1 << 31)) & ~sign;
+			cpu->f[rd] = *((float *)(&data)); 
 			break;
 		default:
-			perror("invalid f7: OP_FLA");
+			perror("exec_FSGNJ: invalid instruction");
 			exit(EXIT_FAILURE);
+	}
+}
+
+void exec_FROUND(INSTR instr, CPU *cpu, MEMORY *mem){
+	int32_t rd = instr.rd_or_imm;
+	int32_t rs1 = instr.rs1;
+
+	switch(instr.op){
+		case FROUNDRM_RNE:
+			fesetround(FE_TONEAREST);
+			cpu->f[rd] = nearbyint(cpu->f[rs1]);
+			break;
+		case FROUNDRM_RTZ:
+			fesetround(FE_TOWARDZERO);
+			cpu->f[rd] = nearbyint(cpu->f[rs1]);
+			break;
+		case FROUNDRM_RDN:
+			cpu->f[rd] = floorf(cpu->f[rs1]);
+			break;
+		case FROUNDRM_RUP:
+			cpu->f[rd] = ceilf(cpu->f[rs1]);
+			break;
+		case FROUNDRM_RMM:
+			cpu->f[rd] = roundf(cpu->f[rs1]);
+			break;
+		default:
+			perror("exec_FROUND: invalid instruction");
+			exit(EXIT_FAILURE);
+	}
+}
+
+//convert integer to float
+void exec_TOF(INSTR instr, CPU *cpu, MEMORY *mem){
+	int32_t rd = instr.rd_or_imm;
+	int32_t rs1 = instr.rs1;
+
+	switch(instr.op){
+		case ITOF:{
+			int32_t data = cpu->x[rs1];
+			cpu->f[rd] = (float)data;
+			break;}
+		/*case UTOF:{
+			uint32_t data = cpu->x[rs1];
+			cpu->f[rd] = (float)data;
+			break;}*/
+		default:
+			perror("exec_TOF: invalid instruction");
+			exit(EXIT_FAILURE);
+	}
+}
+
+//convert float to integer
+void exec_TOI(INSTR instr, CPU *cpu, MEMORY *mem){
+	int32_t rd = instr.rd_or_imm;
+	int32_t rs1 = instr.rs1;
+
+	switch(instr.op){
+		case FTOI:{
+			float data = cpu->f[rs1];
+			cpu->x[rd] = (int32_t)data;
+			break;}
+		/*case FTOUI:{
+			float data = cpu->f[rs1];
+			cpu->x[rd] = (uint32_t)data;
+			break;}*/
+		default:
+			perror("exec_TOI: invalid instruction");
+			exit(EXIT_FAILURE);
+	}
+}
+
+//floating point compare
+void exec_FCOMPARE(INSTR instr, CPU *cpu, MEMORY *mem){
+	int32_t rd = instr.rd_or_imm;
+	int32_t rs1 = instr.rs1;
+	int32_t rs2 = instr.rs2_or_imm;
+
+	switch(instr.op){
+		case FEQ:
+			if(rd != 0)
+				cpu->x[rd] = (cpu->f[rs1] == cpu->f[rs2])? 1 : 0;
+			break;
+		case FLT:
+			if(rd != 0)
+				cpu->x[rd] = (cpu->f[rs1] < cpu->f[rs2])? 1 : 0;
+			break;
+		case FLE:
+			if(rd != 0)
+				cpu->x[rd] = (cpu->f[rs1] <= cpu->f[rs2])? 1 : 0;
+			break;
+		default:
+			perror("exec_FCOMPARE: inavlid instruction");
+			exit(EXIT_FAILURE);
+	}
+}
+
+//floating point arithmetic logic and others
+void exec_FLA(INSTR instr, CPU *cpu, MEMORY *mem){
+	int32_t rd = instr.rd_or_imm;
+	int32_t rs1 = instr.rs1;
+	int32_t rs2 = instr.rs2_or_imm;
+
+	if(instr.op == FADD){
+		cpu->f[rd] = cpu->f[rs1] + cpu->f[rs2];	
+	}
+	else if(instr.op == FSUB){
+		cpu->f[rd] = cpu->f[rs1] - cpu->f[rs2];	
+	}
+	else if(instr.op == FMUL){
+		cpu->f[rd] = cpu->f[rs1] * cpu->f[rs2];	
+	}
+	else if(instr.op == FDIV){
+		cpu->f[rd] = cpu->f[rs1] / cpu->f[rs2];	
+	}
+	else if(instr.op == FSQRT){
+		cpu->f[rd] = sqrtf(cpu->f[rs1]);
+	}
+	else if(FSGNJ_first <= instr.op && instr.op <= FSGNJ_last){
+		exec_FSGNJ(instr, cpu, mem);
+	}
+	else if(FROUND_first <= instr.op && instr.op <= FROUND_last){
+		exec_FROUND(instr, cpu, mem);
+	}
+	else if(instr.op == ITOF){
+		exec_TOF(instr, cpu, mem);
+	}
+	else if(instr.op == FTOI){
+		exec_TOI(instr, cpu, mem);
+	}
+	else if(instr.op == FMVI){
+		if(rd != 0){
+			float tmp = cpu->f[rs1];
+			cpu->x[rd] = *((int *)(&tmp));
+		}
+	}
+	else if(instr.op == IMVF){
+		int tmp = cpu->x[rs1];
+		cpu->f[rd] = *((float *)(&tmp));
+	}
+	else if(FCOMPARE_first <= instr.op && instr.op <= FCOMPARE_last){
+		exec_FCOMPARE(instr, cpu, mem);
+	}
+	else {
+		perror("exec_FLA: invalid instruction");
+		exit(EXIT_FAILURE);
+	}
+}
+
+//floating point arithmetic logic and others mnemonic
+void mnemonic_FLA(INSTR instr, ASSEM *assem){
+	
+	if(instr.op == FADD){
+		assem->itype = R;
+		strcpy(assem->mnemonic, "fadd");
+		strcpy(assem->reg, "fff");
+	}
+	else if(instr.op == FSUB){
+		assem->itype = R;
+		strcpy(assem->mnemonic, "fsub");
+		strcpy(assem->reg, "fff");
+	}
+	else if(instr.op == FMUL){
+		assem->itype = R;
+		strcpy(assem->mnemonic, "fmul");
+		strcpy(assem->reg, "fff");
+	}
+	else if(instr.op == FDIV){
+		assem->itype = R;
+		strcpy(assem->mnemonic, "fdiv");
+		strcpy(assem->reg, "fff");
+	}
+	else if(instr.op == FSQRT){
+		assem->itype = R_sub;
+		strcpy(assem->mnemonic, "fsqrt");
+		strcpy(assem->reg, "ff");
+	}
+	else if(FSGNJ_first <= instr.op && instr.op <= FSGNJ_last){
+		assem->itype = R;
+		strcpy(assem->reg, "fff");
+		switch(instr.op){
+			case FSGNJ:
+				strcpy(assem->mnemonic, "fsgnj");
+				break;
+			case FSGNJX:
+				strcpy(assem->mnemonic, "fsgnjx");
+				break;
+			case FSGNJN:
+				strcpy(assem->mnemonic, "fsgnjn");
+				break;
+			default:
+				perror("mnemonic_FSGNJ: invalid instruction");
+				exit(EXIT_FAILURE);
+		}
+	}
+	else if(FROUND_first <= instr.op && instr.op <= FROUND_last){
+		assem->itype = R;
+		strcpy(assem->mnemonic, "froundrm");
+		strcpy(assem->reg, "ff");
+		switch(instr.op){
+			case FROUNDRM_RNE:
+				strcpy(assem->rm, "RNE");
+				break;
+			case FROUNDRM_RTZ:
+				strcpy(assem->rm, "RTZ");
+				break;
+			case FROUNDRM_RDN:
+				strcpy(assem->rm, "RDN");
+				break;
+			case FROUNDRM_RUP:
+				strcpy(assem->rm, "RUP");
+				break;
+			case FROUNDRM_RMM:
+				strcpy(assem->rm, "RMM");
+				break;
+			default:
+				perror("mnemonic_FROUND: invalid instruction");
+				exit(EXIT_FAILURE);
+		}
+	}
+	else if(instr.op == ITOF){
+		assem->itype = R_sub;
+		strcpy(assem->reg, "fx");
+		strcpy(assem->mnemonic, "itof");
+	}
+	else if(instr.op == FTOI){
+		assem->itype = R_sub;
+		strcpy(assem->reg, "xf"); 
+		strcpy(assem->mnemonic, "ftoi");
+	}
+	else if(instr.op == FMVI){
+		assem->itype = R_sub;
+		strcpy(assem->mnemonic, "fmvi");
+		strcpy(assem->reg, "xf");
+	}
+	else if(instr.op == IMVF){
+		assem->itype = R_sub;
+		strcpy(assem->mnemonic, "imvf");
+		strcpy(assem->reg, "fx");
+	}
+	else if(FCOMPARE_first <= instr.op && instr.op <= FCOMPARE_last){
+		assem->itype = R;
+		strcpy(assem->reg, "xff");
+		switch(instr.op){
+			case FEQ:
+				strcpy(assem->mnemonic, "feq");
+				break;
+			case FLT:
+				strcpy(assem->mnemonic, "flt");
+				break;
+			case FLE:
+				strcpy(assem->mnemonic, "fle");
+				break;
+			default:
+				perror("mnemonic_FCOMPARE: invalid instruction");
+				exit(EXIT_FAILURE);
+		}
+	}
+	else {
+		perror("exec_FLA: invalid instruction");
+		exit(EXIT_FAILURE);
 	}
 }
 

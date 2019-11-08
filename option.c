@@ -3,9 +3,9 @@
 #include <string.h>
 #include <stdlib.h>
 
+#include "struct.h"
 #include "functions.h"
 #include "option.h"
-#include "cpu.h"
 #include "memory.h"
 
 void option_init(OPTION *option){

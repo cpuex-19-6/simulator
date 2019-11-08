@@ -115,13 +115,119 @@
 #define F3_FLE 0b000 //fle
 
 #define OP_IN 0b0001011 //input
-#define INW 0b00000000000000000010 //inw
-#define INF 0b01000000000000000010 //inw
+#define INW20 0b00000000000000000010 //inw
+#define INF20 0b01000000000000000010 //inw
 
 #define OP_OUT 0b0101011 //input
 #define OUTW12 0b000000000000 //outw
 #define OUTW8 0b01000000 //outw
 #define OUTB12 0b000000000000 //outw
 #define OUTB8 0b00000000 //outw
+
+//end of instruction
+#define END	-1
+
+//instruction index
+#define LUI	0 
+
+//LA
+#define LA_first 1
+#define ADD	1 
+#define SUB	2 
+#define DIV	3 
+#define DIVU	4
+#define REM	5
+#define REMU	6
+#define SLL	7
+#define XOR	8
+#define SRL	9
+#define SRA	10
+#define OR	11
+#define AND	12
+#define LA_last 12
+
+//LAI
+#define LAI_first 13
+#define ADDI	13
+#define SLLI	14
+#define XORI	15
+#define SRLI	16
+#define SRAI	17
+#define ORI	18
+#define ANDI	19
+#define LAI_last 19
+
+//LD
+#define LW	20
+
+//ST
+#define SW	21
+
+#define AUIPC	22
+
+#define JAL	23
+
+#define JALR	24 
+
+//CB
+#define CB_first 25
+#define BEQ	25
+#define BNE	26
+#define BLT	27
+#define BGE	28
+#define BLTU	29
+#define BGEU	30
+#define CB_last 30
+
+//FLW
+#define FLW	31
+
+//FSW
+#define FSW	32
+
+//FLA
+#define FLA_first 33
+#define FADD	33
+#define FSUB	34
+#define FMUL	35
+#define FDIV	36
+#define FSQRT	37
+
+#define FSGNJ_first 38
+#define FSGNJ	38
+#define FSGNJN	39
+#define FSGNJX	40
+#define FSGNJ_last 40
+
+#define FROUND_first 41
+#define FROUNDRM_RNE	41
+#define FROUNDRM_RTZ	42
+#define FROUNDRM_RDN	43
+#define FROUNDRM_RUP	44
+#define FROUNDRM_RMM	45
+#define FROUND_last 45
+
+#define ITOF	46
+#define FTOI	47
+#define FMVI	48
+#define IMVF	49
+
+#define FCOMPARE_first 50
+#define FEQ	50
+#define FLT	51
+#define FLE	52
+#define FCOMPARE_last 52
+
+#define FLA_last 52
+
+//IN
+#define INW	53
+#define INF	54
+
+//OUT
+#define OUTB	55
+#define OUTW	56
+
+#define INSTR_NUM 57
 
 #endif

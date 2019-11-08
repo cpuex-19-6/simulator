@@ -3,11 +3,11 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "struct.h"
 #include "cpu.h"
 #include "memory.h"
 #include "sim.h"
 #include "option.h"
-#include "disassemble.h"
 #include "io.h"
 #include "analyse.h"
 

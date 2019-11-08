@@ -3,210 +3,148 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "struct.h"
 #include "functions.h"
 #include "instruction.h"
-#include "sim.h"
 #include "fpu.h"
 #include "disassemble.h"
-#include "fpu.h"
 
-void mnemonic_LA(uint32_t instr, ASSEM *assem){
-	uint32_t f3 = downto(instr, 14, 12);
-	uint32_t f7 = downto(instr, 31, 25);
+void mnemonic_LA(INSTR instr, ASSEM *assem){
 
-	switch(f3){
-		case F3_A:
-			switch(f7){
-				case F7_ADD:
-					strcpy(assem->mnemonic, "add");
-					break;
-				case F7_SUB:
-					strcpy(assem->mnemonic, "sub");
-					break;
-				default:
-					perror("invalid f7: F3_A");
-					exit(EXIT_FAILURE);
-			}
+	switch(instr.op){
+		case ADD:
+			strcpy(assem->mnemonic, "add");
 			break;
-		case F3_OR: 
-			switch(f7){
-				case F7_OR:
-					strcpy(assem->mnemonic, "or");
-					break;
-				case F7_REM:
-					strcpy(assem->mnemonic, "rem");
-					break;
-				default:
-					perror("invalid f7: F3_OR");
-					exit(EXIT_FAILURE);
-			}
+		case SUB:
+			strcpy(assem->mnemonic, "sub");
 			break;
-		case F3_AND: 
-			switch(f7){
-				case F7_AND:
-					strcpy(assem->mnemonic, "and");
-					break;
-				case F7_REMU:
-					strcpy(assem->mnemonic, "remu");
-					break;
-				default:
-					perror("invalid f7: F3_AND");
-					exit(EXIT_FAILURE);
-			}
+		case OR: 
+			strcpy(assem->mnemonic, "or");
 			break;
-		case F3_XOR:
-			switch(f7){
-				case F7_XOR:
-					strcpy(assem->mnemonic, "xor");
-					break;
-				case F7_DIV:
-					strcpy(assem->mnemonic, "div");
-					break;
-				default:
-					perror("invalid f7: F3_XOR");
-					exit(EXIT_FAILURE);
-			}
+		case REM:
+			strcpy(assem->mnemonic, "rem");
 			break;
-		case F3_SL:
-			if(f7 == F7_SLL){
-				strcpy(assem->mnemonic, "sll");
-			}
-			else {
-				perror("invalid f7: F3_SL");
-				exit(EXIT_FAILURE);
-			}
+		case AND: 
+			strcpy(assem->mnemonic, "and");
 			break;
-		case F3_SR:
-			switch(f7){
-				case F7_DIVU:
-					strcpy(assem->mnemonic, "divu");
-					break;
-				case F7_SRL:
-					strcpy(assem->mnemonic, "srl");
-					break;
-				case F7_SRA:
-					strcpy(assem->mnemonic, "sra");
-					break;
-				default:
-					perror("invalid f7: F3_SL");
-					exit(EXIT_FAILURE);
-			}
+		case REMU:
+			strcpy(assem->mnemonic, "remu");
+			break;
+		case XOR:
+			strcpy(assem->mnemonic, "xor");
+			break;
+		case DIV:
+			strcpy(assem->mnemonic, "div");
+			break;
+		case SLL:
+			strcpy(assem->mnemonic, "sll");
+			break;
+		case DIVU:
+			strcpy(assem->mnemonic, "divu");
+			break;
+		case SRL:
+			strcpy(assem->mnemonic, "srl");
+			break;
+		case SRA:
+			strcpy(assem->mnemonic, "sra");
 			break;
 		default:
-			perror("invalid f3: OP_LA");
+			perror("exec_LA: invalid instruction");
 			exit(EXIT_FAILURE);
 	}
 }
 
-void mnemonic_LAI(uint32_t instr, ASSEM *assem){
-	uint32_t f3 = downto(instr, 14, 12);
-	uint32_t f7 = downto(instr, 31, 25);
-	
-	switch(f3){
-		case F3_ADDI:
+void mnemonic_LAI(INSTR instr, ASSEM *assem){
+
+	switch(instr.op){
+		case ADDI: 
 			strcpy(assem->mnemonic, "addi");
 			break;
-		case F3_ORI:
+		case ORI: 
 			strcpy(assem->mnemonic, "ori");
 			break;
-		case F3_ANDI:
+		case ANDI:
 			strcpy(assem->mnemonic, "andi");
 			break;
-		case F3_XORI:
+		case XORI:
 			strcpy(assem->mnemonic, "xori");
 			break;
-		case F3_SLI:
-			if(f7 == F7_SLLI){
-				strcpy(assem->mnemonic, "slli");
-			}
-			else {
-				perror("invalid f7: F3_SLI");
-				exit(EXIT_FAILURE);
-			}
+		case SLLI:
+			strcpy(assem->mnemonic, "slli");
 			break;
-		case F3_SRI:
-			if(f7 == F7_SRLI){
-				strcpy(assem->mnemonic, "srli");
-
-			}
-			else if(f7 == F7_SRAI){
-				strcpy(assem->mnemonic, "srai");
-			}
-			else {
-				perror("invalid f7: F3_SRI");
-				exit(EXIT_FAILURE);
-			}
+		case SRLI:
+			strcpy(assem->mnemonic, "srli");
+			break;
+		case SRAI:
+			strcpy(assem->mnemonic, "srai");
 			break;
 		default:
-			perror("invalid f3: OP_LA");
+			perror("exec_LAI: invalid instruction");
 			exit(EXIT_FAILURE);
 	}
 }
 
-void mnemonic_LD(uint32_t instr, ASSEM *assem){
-	uint32_t f3 = downto(instr, 14, 12);
+void mnemonic_LD(INSTR instr, ASSEM *assem){
 
-	switch(f3){
-		case F3_LB:
-			strcpy(assem->mnemonic, "lb");
-			break;
-		case F3_LH:
-			strcpy(assem->mnemonic, "lh");
-			break;
-		case F3_LW:
+	switch(instr.op){
+		case LW:
 			strcpy(assem->mnemonic, "lw");
 			break;
-		case F3_LBU:
+		/*case LB:
+			strcpy(assem->mnemonic, "lb");
+			break;
+		case LH:
+			strcpy(assem->mnemonic, "lh");
+			break;
+		case LBU:
 			strcpy(assem->mnemonic, "lbu");
 			break;
-		case F3_LHU:
+		case LHU:
 			strcpy(assem->mnemonic, "lhu");
-			break;
+			break;*/
 		default:
 			perror("invalid f3: OP_LD");
 			exit(EXIT_FAILURE);
 	}
 }
 
-void mnemonic_ST(uint32_t instr, ASSEM *assem){
-	uint32_t f3 = downto(instr, 14, 12);
+void mnemonic_ST(INSTR instr, ASSEM *assem){
 
-	switch(f3){
-		case F3_SB:
-			strcpy(assem->mnemonic, "sb");
-			break;
-		case F3_SH:
-			strcpy(assem->mnemonic, "sh");
-			break;
-		case F3_SW:
+	switch(instr.op){
+		case SW:
 			strcpy(assem->mnemonic, "sw");
 			break;
+		/*case SB:
+			strcpy(assem->mnemonic, "sb");
+			break;
+		case SH:
+			strcpy(assem->mnemonic, "sh");
+			break;*/
 		default:
 			perror("invalid f3: OP_ST");
 			exit(EXIT_FAILURE);
 	}
 }
 
-void mnemonic_CB(uint32_t instr, ASSEM *assem){
-	uint32_t f3 = downto(instr, 14, 12);
+void mnemonic_CB(INSTR instr, ASSEM *assem){
 
-	switch(f3){
-		case F3_BEQ:
+	switch(instr.op){
+		case BEQ:
 			strcpy(assem->mnemonic, "beq");
 			break;
-		case F3_BNE:
+		case BNE:
 			strcpy(assem->mnemonic, "bne");
 			break;
-		case F3_BLT:
+		case BLT:
 			strcpy(assem->mnemonic, "blt");
 			break;
-		case F3_BGE:
+		case BGE:
 			strcpy(assem->mnemonic, "bge");
 			break;
-		case F3_BLTU:
+		case BLTU:
 			strcpy(assem->mnemonic, "bltu");
 			break;
-		case F3_BGEU:
+		case BGEU:
 			strcpy(assem->mnemonic, "bgeu");
 			break;
 		default:
@@ -215,10 +153,9 @@ void mnemonic_CB(uint32_t instr, ASSEM *assem){
 	}
 }
 
-void mnemonic_IN(uint32_t instr, ASSEM *assem){
-	int32_t f20 = downto(instr, 31, 12); 
+void mnemonic_IN(INSTR instr, ASSEM *assem){
 
-	switch(f20){
+	switch(instr.op){
 		case INW:
 			strcpy(assem->mnemonic, "inw");
 			strcpy(assem->reg, "x");
@@ -233,143 +170,130 @@ void mnemonic_IN(uint32_t instr, ASSEM *assem){
 	}
 }
 
-void mnemonic_OUT(uint32_t instr, ASSEM *assem){
-	int32_t f12 = downto(instr, 31, 20); 
-	int32_t f8 = downto(instr, 14, 7);
+void mnemonic_OUT(INSTR instr, ASSEM *assem){
 
-	switch(f8){
-		case OUTW8:
-			if(f12 != OUTW12){
-				perror("invalid f12: OUTW8");
-				exit(EXIT_FAILURE);
-			}
+	switch(instr.op){
+		case OUTW:
 			strcpy(assem->mnemonic, "outw");
 			strcpy(assem->reg, "x");
 			break;
-		case OUTB8:
-			if(f12 != OUTW12){
-				perror("invalid f12: OUTB8");
-				exit(EXIT_FAILURE);
-			}
+		case OUTB:
 			strcpy(assem->mnemonic, "outb");
 			strcpy(assem->reg, "x");
 			break;
 		default:
-			perror("invalid f8: OP_OUT");
+			perror("mnemonic_OUT: invalid instruction");
 			exit(EXIT_FAILURE);
 	}
 }
 
-void disassem_instr(uint32_t instr, ASSEM *assem){
-	uint32_t opcd = downto(instr, 6, 0);
+void disassem_instr(INSTR instr, ASSEM *assem){
 
-	switch(opcd){
-		case OP_LUI:	//U
-			assem->itype = U;
-			strcpy(assem->mnemonic, "lui");
-			strcpy(assem->reg, "x");
-			break;
-		case OP_LA:	//R
-			assem->itype = R;
-			mnemonic_LA(instr, assem);
-			strcpy(assem->reg, "xxx");
-			break;
-		case OP_LAI:	//I
-			assem->itype = I;
-			mnemonic_LAI(instr, assem);
-			strcpy(assem->reg, "xx");
-			break;
-		case OP_LD:	//I
-			assem->itype = I;
-			mnemonic_LD(instr, assem);
-			strcpy(assem->reg, "xx");
-			break;
-		case OP_ST:	//S
-			assem->itype = S;
-			mnemonic_ST(instr, assem);
-			strcpy(assem->reg, "xx");
-			break;
-		case OP_AUIPC:	//U
-			assem->itype = U;
-			strcpy(assem->mnemonic, "auipc");
-			strcpy(assem->reg, "x");
-			break;
-		case OP_JAL:	//J
-			assem->itype = J;
-			strcpy(assem->mnemonic, "jal");
-			strcpy(assem->reg, "x");
-			break;
-		case OP_JALR:	//I
-			assem->itype = I;
-			strcpy(assem->mnemonic, "jalr");
-			strcpy(assem->reg, "xx");
-			break;
-		case OP_CB:	//B
-			assem->itype = B;
-			mnemonic_CB(instr, assem);
-			strcpy(assem->reg, "xx");
-			break;
-		//floating point instruction
-		case OP_FLW: //I
-			assem->itype = I;
-			strcpy(assem->mnemonic, "flw");
-			strcpy(assem->reg, "fx");
-			break;
-		case OP_FSW: //S
-			assem->itype = S;
-			strcpy(assem->mnemonic, "fsw");
-			strcpy(assem->reg, "xf");
-			break;
-		case OP_FLA: //R or R_sub
-			mnemonic_FLA(instr, assem);
-			break;
-		case OP_IN: //R_sub_sub
-			assem->itype = R_sub_sub;
-			mnemonic_IN(instr, assem);
-			break;
-		case OP_OUT: //R_sub_sub
-			assem->itype = R_sub_sub_sub;
-			mnemonic_OUT(instr, assem);
-			break;
-		default:
-			perror("Unkown instruction");
-			exit(EXIT_FAILURE);
+	assem->rd_or_imm = instr.rd_or_imm;
+	assem->rs1 = instr.rs1;
+	assem->rs2_or_imm = instr.rs2_or_imm;
+
+	if(instr.op == LUI){
+		assem->itype = U;
+		strcpy(assem->mnemonic, "lui");
+		strcpy(assem->reg, "x");
 	}
-	assem->rd = (int32_t)downto(instr, 11, 7);
-	assem-> rs1 = (int32_t)downto(instr, 19, 15);
-	assem-> rs2 = (int32_t)downto(instr, 24, 20);
-	assem->imm = immediate(instr, assem->itype);
+	else if(LA_first <= instr.op && instr.op <= LA_last){
+		assem->itype = R;
+		mnemonic_LA(instr, assem);
+		strcpy(assem->reg, "xxx");
+	}
+	else if(LAI_first <= instr.op && instr.op <= LAI_last){
+		assem->itype = I;
+		mnemonic_LAI(instr, assem);
+		strcpy(assem->reg, "xx");
+	}
+	else if(instr.op == LW){
+		assem->itype = I;
+		mnemonic_LD(instr, assem);
+		strcpy(assem->reg, "xx");
+	}
+	else if(instr.op == SW){
+		assem->itype = S;
+		mnemonic_ST(instr, assem);
+		strcpy(assem->reg, "xx");
+	}
+	else if(instr.op == AUIPC){
+		assem->itype = U;
+		strcpy(assem->mnemonic, "auipc");
+		strcpy(assem->reg, "x");
+	}
+	else if(instr.op == JAL){
+		assem->itype = J;
+		strcpy(assem->mnemonic, "jal");
+		strcpy(assem->reg, "x");
+	}
+	else if(instr.op == JALR){
+		assem->itype = I;
+		strcpy(assem->mnemonic, "jalr");
+		strcpy(assem->reg, "xx");
+	}
+	else if(CB_first <= instr.op && instr.op <= CB_last){
+		assem->itype = B;
+		mnemonic_CB(instr, assem);
+		strcpy(assem->reg, "xx");
+	}
+	else if(instr.op == FLW){
+		assem->itype = I;
+		strcpy(assem->mnemonic, "flw");
+		strcpy(assem->reg, "fx");
+	}
+	else if(instr.op == FSW){
+		assem->itype = S;
+		strcpy(assem->mnemonic, "fsw");
+		strcpy(assem->reg, "xf");
+	}
+	else if(FLA_first <= instr.op && instr.op <= FLA_last){
+		mnemonic_FLA(instr, assem);
+	}
+	else if(instr.op == INW || instr.op == INF){
+		assem->itype = R_sub_sub;
+		mnemonic_IN(instr, assem);
+	}
+	else if(instr.op == OUTB || instr.op == OUTW){
+		assem->itype = R_sub_sub_sub;
+		mnemonic_OUT(instr, assem);
+	}
+	else{
+		perror("exec_instr: invalid instruction");
+		exit(EXIT_FAILURE);
+	}
 }
 
 void print_assembly(ASSEM assem){
 	switch(assem.itype){
 		case R:
-			printf("%-6s %c%-2d, %c%-2d, %c%-2d", assem.mnemonic, assem.reg[0], assem.rd, assem.reg[1] ,assem.rs1, assem.reg[2] ,assem.rs2);
+			printf("%-6s %c%-2d, %c%-2d, %c%-2d", assem.mnemonic, assem.reg[0], assem.rd_or_imm, assem.reg[1] ,assem.rs1, assem.reg[2] ,assem.rs2_or_imm);
 			break;
 		case R_sub:
-			printf("%-6s %c%-2d, %c%-2d", assem.mnemonic, assem.reg[0], assem.rd, assem.reg[1] ,assem.rs1);
+			printf("%-6s %c%-2d, %c%-2d", assem.mnemonic, assem.reg[0], assem.rd_or_imm, assem.reg[1] ,assem.rs1);
 			if(strcmp(assem.mnemonic, "froundrm") == 0)
 				printf(", %s", assem.rm);
 			break;
 		case R_sub_sub:
-			printf("%-6s %c%-2d", assem.mnemonic, assem.reg[0], assem.rd);
+			printf("%-6s %c%-2d", assem.mnemonic, assem.reg[0], assem.rd_or_imm);
 			break;
 		case R_sub_sub_sub:
 			printf("%-6s %c%-2d", assem.mnemonic, assem.reg[0], assem.rs1);
 			break;
 		case I:
-			printf("%-6s %c%-2d, %c%-2d, %d", assem.mnemonic, assem.reg[0], assem.rd, assem.reg[1], assem.rs1, assem.imm);
+			printf("%-6s %c%-2d, %c%-2d, %d", assem.mnemonic, assem.reg[0], assem.rd_or_imm, assem.reg[1], assem.rs1, assem.rs2_or_imm);
 			break;
 		case S:
-			printf("%-6s %c%-2d, %c%-2d, %d", assem.mnemonic, assem.reg[0], assem.rs1, assem.reg[1], assem.rs2, assem.imm);
+			printf("%-6s %c%-2d, %c%-2d, %d", assem.mnemonic, assem.reg[0], assem.rs1, assem.reg[1], assem.rs2_or_imm, assem.rd_or_imm);
 			break;
 		case B:
-			printf("%-6s %c%-2d, %c%-2d, %d", assem.mnemonic, assem.reg[0], assem.rs1, assem.reg[1], assem.rs2, assem.imm);
+			printf("%-6s %c%-2d, %c%-2d, %d", assem.mnemonic, assem.reg[0], assem.rs1, assem.reg[1], assem.rs2_or_imm, assem.rd_or_imm);
 			break;
 		case U:
-			printf("%-6s %c%-2d, %d", assem.mnemonic, assem.reg[0], assem.rd, assem.imm);
+			printf("%-6s %c%-2d, %d", assem.mnemonic, assem.reg[0], assem.rd_or_imm, assem.rs2_or_imm);
 			break;
 		default: //J
-			printf("%-6s %c%-2d, %d", assem.mnemonic, assem.reg[0], assem.rd, assem.imm);
+			printf("%-6s %c%-2d, %d", assem.mnemonic, assem.reg[0], assem.rd_or_imm, assem.rs2_or_imm);
 	}
 }
