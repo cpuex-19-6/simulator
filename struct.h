@@ -49,13 +49,6 @@ typedef struct memory_t {
 
 //option
 
-typedef struct tag_t{
-	char tag[100];
-	unsigned int pc;
-	long long unsigned int count;
-	struct *tag_t;
-}TAG;
-
 typedef enum ftype_t{
 	BIN,
 	TXT,
@@ -104,6 +97,7 @@ typedef struct option_t {
 	char *fname_instr;
 	char *fname_data;
 	char *fname_output;
+	char *fname_tags;
 	TAG *tags;
 	MODE mode;
 	uint32_t reg;
@@ -138,8 +132,16 @@ typedef struct assem_t {
 
 //status
 
+typedef struct tag_t{
+	char tag[100];
+	unsigned int pc;
+	long long unsigned int count;
+	struct tag_t *next;
+}TAG;
+
 typedef struct state_t{
 	long long unsigned int instr_num;
+	TAG *tag;
 	unsigned int heap_top;
 	//unsigned int heap_bottom;
 	//unsigned int stack_top;
