@@ -5,8 +5,8 @@
 
 #include "struct.h"
 
-#define INSTR_MEM_SIZE 131072 //number of 8 bit cells 4byte * 1 << 15
-#define DATA_MEM_SIZE 2097152 //number of 8 bit cells 1byte * 1 << 21
+#define INSTR_MEM_SIZE 131072 //number of 8 bit cells :4byte * 1 << 15
+#define DATA_MEM_SIZE 2097152 //number of 8 bit cells :1byte * 1 << 21
 
 void mem_init(MEMORY *mem);
 void mem_set(MEMORY *mem, OPTION option);

@@ -73,7 +73,7 @@ int load_instr_txt(uint32_t *instr, char *filename){
 		exit(EXIT_FAILURE); }
 	
 	char *tmp;
-	tmp = malloc(INSTR_MEM_SIZE*8);
+	tmp = malloc(INSTR_MEM_SIZE*9);
 	int n = 0;
 	
 	if((n = fread(tmp, sizeof(char), INSTR_MEM_SIZE * 9, fp)) == 0){ //read and load txt data, テキストファイルを読むのでちょっと多めに読んでる。

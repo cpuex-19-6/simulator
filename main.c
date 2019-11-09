@@ -88,5 +88,6 @@ int main(int argc, char *argv[]){
 	option_free(&option);
 	mem_free(&mem);
 	io_close(&io);
+	state_free(&state);
 	return 0;
 }

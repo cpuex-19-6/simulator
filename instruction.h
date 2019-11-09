@@ -228,6 +228,6 @@
 #define OUTB	55
 #define OUTW	56
 
-#define INSTR_NUM 57
+#define TOTAL_INSTR 57
 
 #endif

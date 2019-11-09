@@ -13,6 +13,7 @@ uint32_t downto(uint32_t u, int n, int m){
 //テキストで表されたデータをバイナリに変換　ただし、8ビットずつ
 //命令メモリの方で使うものなので、エンディアンは調整していない（遅くなるから）
 int c2b_8(uint8_t *dest, char *source, size_t size){
+	int ans = 0;
 	int count = 0;
 	uint8_t tmp = 0;
 
@@ -28,18 +29,20 @@ int c2b_8(uint8_t *dest, char *source, size_t size){
 			default:
 				break;
 		}
-		if(count % 8 == 0 && count > 0){
+		if(count == 8){
+			ans += count;
 			*dest = tmp;
-			dest++;
 			count = 0;
+			dest++;
 			tmp = 0;
 		}
 	}	
 
-	return count;
+	return ans;
 }
 
 int c2b_32(uint32_t *dest, char *source, size_t size){
+	int ans = 0;
 	int count = 0;
 	uint32_t tmp = 0;
 
@@ -55,15 +58,16 @@ int c2b_32(uint32_t *dest, char *source, size_t size){
 			default:
 				break;
 		}
-		if(count % 32  == 0 && count > 0){
+		if(count == 32){
+			ans += count;
 			*dest = tmp;
-			dest++;
 			count = 0;
+			dest++;
 			tmp = 0;
 		}
 	}	
 
-	return count;
+	return ans;
 }
 
 void b2c_32(char *dest, int32_t source){

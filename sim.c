@@ -320,13 +320,12 @@ void exec_instr(INSTR instr, CPU *cpu, MEMORY *mem, IO *io, STATE *state){
 		exit(EXIT_FAILURE);
 	}
 	
-	int32_t rd = instr.rd_or_imm;
-	state_update(state, *cpu, rd);
+	state_update(state, *cpu, instr);
 
 }
 
 INSTR fetch(CPU *cpu, MEMORY *mem){
-	uint32_t addr_instr = cpu->pc;
+	uint32_t addr_instr = (cpu->pc)/4;
 	return mem->instr[addr_instr];
 }
 
@@ -352,15 +351,15 @@ int step(CPU *cpu, MEMORY *mem, IO *io, OPTION *option, STATE *state){
 
 	if(instr.op != END){
 		putchar('\n');
-		printf("pc: %d:", cpu->pc);
+		printf("pc: %d: ", cpu->pc);
 		exec_instr(instr, cpu, mem, io, state);
 
 		ASSEM assem;
 		//assem_init(&assem);
 		disassem_instr(instr, &assem);
-		printf(" 0b");
+		//printf(" 0b");
 		//print_binary(instr);
-		printf(": ");
+		//printf(": ");
 		print_assembly(assem);
 		putchar('\n');
 		putchar('\n');
