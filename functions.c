@@ -16,15 +16,25 @@ int c2b_8(uint8_t *dest, char *source, size_t size){
 	int ans = 0;
 	int count = 0;
 	uint8_t tmp = 0;
+	int skip = 0;
 
 	for(int i = 0; i < size; i++){
 		switch(source[i]){
 			case '0':
-				count++;
+				if(skip == 0)
+					count++;
 				break;
 			case '1':
-				tmp = tmp | (1 << (7 - count));
-				count++;
+				if(skip == 0){
+					tmp = tmp | (1 << (7 - count));
+					count++;
+				}
+				break;
+			case '/': //comment start
+				skip = ~0;
+				break;
+			case '\n':
+				if(skip)skip = 0;
 				break;
 			default:
 				break;
@@ -45,15 +55,25 @@ int c2b_32(uint32_t *dest, char *source, size_t size){
 	int ans = 0;
 	int count = 0;
 	uint32_t tmp = 0;
+	int skip = 0;
 
 	for(int i = 0; i < size; i++){
 		switch(source[i]){
 			case '0':
-				count++;
+				if(skip == 0)
+					count++;
 				break;
 			case '1':
-				tmp = tmp | (1 << (31 - count));
-				count++;
+				if(skip == 0){
+					tmp = tmp | (1 << (31 - count));
+					count++;
+				}
+				break;
+			case '/': //comment start
+				skip = ~0;
+				break;
+			case '\n':
+				if(skip)skip = 0;
 				break;
 			default:
 				break;

@@ -23,8 +23,6 @@ void tag_set(TAG **tag, FILE *fp, char *s, unsigned int *n){
 	if(*tag == NULL)
 		*tag = malloc(sizeof(TAG));
 
-	printf("%s, %u\n", s, *n);
-
 	strcpy((*tag)->label, s);
 	(*tag)->pc = *n;
 	(*tag)->count = 0;
