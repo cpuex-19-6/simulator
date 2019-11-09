@@ -97,8 +97,8 @@ typedef struct option_t {
 	char *fname_instr;
 	char *fname_data;
 	char *fname_output;
-	char *fname_tags;
-	TAG *tags;
+	//char *fname_tags;
+	//TAG *tags;
 	MODE mode;
 	uint32_t reg;
 	uint32_t reg16;
