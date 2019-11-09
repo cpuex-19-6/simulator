@@ -27,6 +27,7 @@ int main(int argc, char *argv[]){
 	option_set(argc - 1, argv + 1, &option);
 	mem_set(&mem, option);
 	io_set(&io, option);
+	state_set(&state, option);
 
 	char s[COM_LEN];
 	int quit = 0;
@@ -53,9 +54,10 @@ int main(int argc, char *argv[]){
 	printf("finished setup\n\n");
 
 	option.cmd_in = stdin;
+	option.prompt = 1;
 
 	while(quit == 0){
-		printf("simulator:>");
+		//printf("simulator:>");
 		command_parser(s, &option);
 
 		switch(option.mode){

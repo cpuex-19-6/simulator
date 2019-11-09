@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 #include "struct.h"
 #include "instruction.h"
@@ -8,6 +9,7 @@
 
 void state_init(STATE *state){
 	state->instr_num = 0;
+	state->tags = NULL;
 	state->heap_top = 0;
 	//state->heap_bottom = 0;
 	//state->stack_top = DATA_MEM_SIZE;
@@ -15,8 +17,51 @@ void state_init(STATE *state){
 	state->op = malloc(sizeof(long long int)*TOTAL_INSTR);
 }
 
+void tag_set(TAG **tag, FILE *fp, char *s, unsigned int *n){
+	if(fscanf(fp, "%s%u", s, n) == 2){
+	
+	if(*tag == NULL)
+		*tag = malloc(sizeof(TAG));
+
+	printf("%s, %u\n", s, *n);
+
+	strcpy((*tag)->label, s);
+	(*tag)->pc = *n;
+	(*tag)->count = 0;
+	(*tag)->next = NULL;
+
+	tag_set(&((*tag)->next), fp, s, n);
+	}
+}
+void free_tags(TAG *tag){
+	if(tag != NULL){
+		TAG *next;
+		next = tag->next;
+		free(tag);
+		free_tags(next);
+	}
+}
+
+void state_set(STATE *state, OPTION option){
+	if(option.fname_tags != NULL){
+
+		FILE *fp;
+		if((fp = fopen(option.fname_tags, "r")) == NULL){
+			perror("failed to open tag file");
+			exit(EXIT_FAILURE);
+		}
+		printf("using \"%s\" as tag file\n", option.fname_tags);
+		char s[101];
+		unsigned int n;
+		tag_set(&(state->tags), fp, s, &n);
+
+		fclose(fp);
+	}
+}
+
 void state_free(STATE *state){
 	free(state->op);
+	free_tags(state->tags);
 }
 
 void print_op(int op){
@@ -198,6 +243,13 @@ void print_op(int op){
 	}
 }
 
+void print_tag(TAG *tag){
+	if(tag != NULL){
+		printf("#%s\t: %llu\n", tag->label, tag->count);
+		print_tag(tag->next);
+	}
+}
+
 void print_state(STATE state){
 	printf("Analysed data\n");
 	putchar('\n');
@@ -209,7 +261,7 @@ void print_state(STATE state){
 	printf("total executed instructions: %llu\n", state.instr_num);
 	putchar('\n');
 
-	printf("number of times each instruction executed :\n");
+	printf("number of times each instruction executed:\n");
 	putchar('\n');
 	for(int i = 0; i < TOTAL_INSTR; i++){
 		if(state.op[i] > 0){
@@ -218,7 +270,22 @@ void print_state(STATE state){
 		}
 	}
 	putchar('\n');
+
+	if(state.tags != NULL){
+		printf("number of times each tag visited: \n");
+		putchar('\n');
+		print_tag(state.tags);
+		putchar('\n');
+	}
 	
+}
+
+void tag_check(TAG *tag, int pc){
+	if(tag != NULL){
+		if(tag->pc == pc)
+			tag->count++;
+		else tag_check(tag->next, pc);
+	}
 }
 
 void state_update(STATE *state, CPU cpu, INSTR instr){

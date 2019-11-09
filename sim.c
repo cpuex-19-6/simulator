@@ -250,6 +250,8 @@ void exec_CB(INSTR instr, CPU *cpu, MEMORY *mem){
 //rd がゼロレジスタの時は代入させておいて最後に代入がいい?
 void exec_instr(INSTR instr, CPU *cpu, MEMORY *mem, IO *io, STATE *state){
 
+	tag_check(state->tags, cpu->pc);
+
 	if(instr.op == LUI){
 		int32_t rd = instr.rd_or_imm;
 		int32_t imm = instr.rs2_or_imm;

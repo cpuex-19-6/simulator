@@ -10,12 +10,14 @@
 
 void option_init(OPTION *option){
 	option->cmd_in = stdin;
+	option->prompt = 1;
 	option->ftype_instr = BIN;
 	option->ftype_data = BIN;
 	option->ftype_output = BIN;
 	option->fname_instr = NULL;
 	option->fname_data = NULL;
 	option->fname_output = NULL;
+	option->fname_tags = NULL;
 	option->mode = NONE;
 	option->reg = 0;
 	option->freg = 0;
@@ -83,9 +85,14 @@ void option_set(int argn, char **arg, OPTION *option){
 						printf("using \"%s\" as setup file\n", arg[i]);
 						option->cmd_in= fp;
 					}
-					else
-						printf("failed to open setup file\n");
+					else printf("failed to open setup file\n");
+					option->prompt = 0;
 					break;}
+				case 'l':
+					i++;
+					option->fname_tags = malloc(strlen(arg[i]) + 1);
+					strcpy(option->fname_tags, arg[i]);
+					 break;
 				default:
 					perror("invalid option");
 					exit(EXIT_FAILURE);
@@ -106,6 +113,7 @@ void option_free(OPTION *option){
 	free(option->fname_instr);
 	free(option->fname_data);
 	free(option->fname_output);
+	free(option->fname_tags);
 	if(option->breakpoint.bp != NULL)
 		free(option->breakpoint.bp);
 	if(option->mem_print.mp != NULL)
@@ -122,6 +130,7 @@ int command_parser(char *s, OPTION *option){
 	int b = 0;
 
 	while(b == 0 && feof(option->cmd_in) == 0){
+		if(option->prompt)printf("simulator:>");
 
 		if(fscanf(option->cmd_in, "%s", s) < 0)break;
 

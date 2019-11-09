@@ -91,14 +91,14 @@ typedef struct break_point_t{
 
 typedef struct option_t {
 	FILE *cmd_in;
+	int prompt;
 	FTYPE ftype_instr;
 	FTYPE ftype_data;
 	FTYPE ftype_output;
 	char *fname_instr;
 	char *fname_data;
 	char *fname_output;
-	//char *fname_tags;
-	//TAG *tags;
+	char *fname_tags;
 	MODE mode;
 	uint32_t reg;
 	uint32_t reg16;
@@ -133,7 +133,7 @@ typedef struct assem_t {
 //status
 
 typedef struct tag_t{
-	char tag[100];
+	char label[101];
 	unsigned int pc;
 	long long unsigned int count;
 	struct tag_t *next;
@@ -141,7 +141,7 @@ typedef struct tag_t{
 
 typedef struct state_t{
 	long long unsigned int instr_num;
-	TAG *tag;
+	TAG *tags;
 	unsigned int heap_top;
 	//unsigned int heap_bottom;
 	//unsigned int stack_top;
