@@ -19,12 +19,14 @@ void io_set(IO *io, OPTION option){
 		if(option.ftype_data == BIN){
 			io->ftype_in = BIN;
 			io->input = fopen(option.fname_data, "rb");
+			printf("using \"%s\" as txt input file\n", option.fname_data);
 			if(io->input == NULL)
 				printf("cannot open input file\n");
 		}
 		else{ //TXT
 			io->ftype_in = TXT;
 			io->input = fopen(option.fname_data, "r");
+			printf("using \"%s\" as txt input file\n", option.fname_data);
 			if(io->input == NULL)
 				printf("cannot open input file\n");
 		}
@@ -117,7 +119,7 @@ void exec_IN(INSTR instr, CPU *cpu, MEMORY *mem, IO *io){
 
 	switch(instr.op){
 		case INW:{
-			int32_t data;
+			int32_t data = 1;
 			if(io->ftype_in == BIN){
 				n = fread(&data, sizeof(int32_t), 1, io->input);
 				if(n <= 0)printf("failed to input: inw: bin\n");
@@ -127,7 +129,7 @@ void exec_IN(INSTR instr, CPU *cpu, MEMORY *mem, IO *io){
 				char tmp[32];
 				n = fread(tmp, sizeof(char), 32, io->input);
 				if(n <= 0)printf("failed to input: inw: txt\n");
-				c2b_32((uint32_t *)&data, tmp, sizeof(int32_t));
+				c2b_32((uint32_t *)&data, tmp, 32);
 				cpu->x[rd] = data;
 			}
 			break;}
@@ -142,7 +144,7 @@ void exec_IN(INSTR instr, CPU *cpu, MEMORY *mem, IO *io){
 				char tmp[32];
 				n = fread(tmp, sizeof(char), 32, io->input);
 				if(n <= 0)printf("failed to input: inf: txt\n");
-				c2b_32((uint32_t *)&data, tmp, sizeof(float));
+				c2b_32((uint32_t *)&data, tmp, 32);
 				cpu->f[rd] = data;
 			}
 			break;}
