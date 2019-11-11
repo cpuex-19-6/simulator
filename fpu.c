@@ -296,7 +296,7 @@ void decode_FLA(uint32_t instr, INSTR *imp){
 				exit(EXIT_FAILURE);
 			}
 			if(rs2 == RS2_IMVF){
-				imp->op = FMVI;
+				imp->op = IMVF;
 				imp->rd_or_imm = rd;
 				imp->rs1 = rs1;
 			}
