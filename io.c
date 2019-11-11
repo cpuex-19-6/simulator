@@ -116,6 +116,7 @@ void exec_IN(INSTR instr, CPU *cpu, MEMORY *mem, IO *io){
 	int32_t rd = instr.rd_or_imm;
 
 	int n;
+	if(feof(io->input))printf("already at the end of input file!!!!!!!\n");
 
 	switch(instr.op){
 		case INW:{
