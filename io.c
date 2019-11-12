@@ -120,17 +120,23 @@ void exec_IN(INSTR instr, CPU *cpu, MEMORY *mem, IO *io){
 
 	switch(instr.op){
 		case INW:{
-			int32_t data = 1;
+			int32_t data;
 			if(io->ftype_in == BIN){
 				n = fread(&data, sizeof(int32_t), 1, io->input);
 				if(n <= 0)printf("failed to input: inw: bin\n");
 				cpu->x[rd] = data;
 			}
 			else{ //TXT
+				/*
 				char tmp[32];
 				n = fread(tmp, sizeof(char), 32, io->input);
 				if(n <= 0)printf("failed to input: inw: txt\n");
 				c2b_32((uint32_t *)&data, tmp, 32);
+				cpu->x[rd] = data;
+				*/
+				int32_t data;
+				n = fscanf(io->input, "%d", &data);
+				if(n != 1)printf("failed to input: inw: txt\n");
 				cpu->x[rd] = data;
 			}
 			break;}
@@ -142,10 +148,16 @@ void exec_IN(INSTR instr, CPU *cpu, MEMORY *mem, IO *io){
 				cpu->f[rd] = data;
 			}
 			else{ //TXT
+				/*
 				char tmp[32];
 				n = fread(tmp, sizeof(char), 32, io->input);
 				if(n <= 0)printf("failed to input: inf: txt\n");
 				c2b_32((uint32_t *)&data, tmp, 32);
+				cpu->f[rd] = data;
+				*/
+				float data;
+				n = fscanf(io->input, "%f", &data);
+				if(n != 1)printf("failed to input: inf: txt\n");
 				cpu->f[rd] = data;
 			}
 			break;}
