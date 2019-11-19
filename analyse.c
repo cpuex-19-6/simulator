@@ -305,4 +305,9 @@ void state_update(STATE *state, CPU cpu, INSTR instr){
 		default:
 			{}
 	}
+
+	if(cpu.x[2] <= cpu.x[3]){
+		perror("stack pointer < heap pointer");
+		exit(EXIT_FAILURE);
+	}
 }
