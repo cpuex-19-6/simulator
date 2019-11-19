@@ -1,5 +1,5 @@
 CC = gcc
-CFLAGS = -Wall -MMD -MP
+CFLAGS = -Wall -MMD -MP -O2
 LDFLAGS = -lm
 TARGET = sim
 SRCS = $(wildcard *.c)

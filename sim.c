@@ -252,6 +252,8 @@ void exec_instr(INSTR instr, CPU *cpu, MEMORY *mem, IO *io, STATE *state){
 
 	tag_check(state->tags, cpu->pc);
 
+	int oldpc = cpu->pc;
+
 	if(instr.op == LUI){
 		int32_t rd = instr.rd_or_imm;
 		int32_t imm = instr.rs2_or_imm;
@@ -322,11 +324,13 @@ void exec_instr(INSTR instr, CPU *cpu, MEMORY *mem, IO *io, STATE *state){
 		exit(EXIT_FAILURE);
 	}
 	
+	address_check_instr(cpu->pc, oldpc);
 	state_update(state, *cpu, instr);
 
 }
 
 INSTR fetch(CPU *cpu, MEMORY *mem){
+	//address_check_instr(cpu->pc);
 	uint32_t addr_instr = (cpu->pc)/4;
 	return mem->instr[addr_instr];
 }

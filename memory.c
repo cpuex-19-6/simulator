@@ -164,3 +164,11 @@ void address_check(int address){
 		exit(EXIT_FAILURE);
 	}
 }
+
+void address_check_instr(int pc, int oldpc){
+	int address = pc /4;
+	if(address < 0 || address >= INSTR_MEM_SIZE){
+		printf("invalid memory access: pc %d: address %d: oldpc %d\n", pc, address, oldpc);
+		exit(EXIT_FAILURE);
+	}
+}

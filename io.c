@@ -99,7 +99,7 @@ void decode_OUT(uint32_t instr, INSTR *imp){
 			imp->op = OUTW;
 			break;
 		case OUTB8:
-			if(f12 != OUTW12){
+			if(f12 != OUTB12){
 				perror("invalid f12: OUTB8");
 				exit(EXIT_FAILURE);
 			}

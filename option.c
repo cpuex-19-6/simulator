@@ -20,6 +20,7 @@ void option_init(OPTION *option){
 	option->fname_tags = NULL;
 	option->mode = NONE;
 	option->reg = 0;
+	option->reg16 = 0;
 	option->freg = 0;
 	option->breakpoint.bp = NULL;
 	option->breakpoint.num = 0;

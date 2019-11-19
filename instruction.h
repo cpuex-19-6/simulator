@@ -118,11 +118,11 @@
 #define INW20 0b00000000000000000010 //inw
 #define INF20 0b01000000000000000010 //inw
 
-#define OP_OUT 0b0101011 //input
+#define OP_OUT 0b0101011 //output
 #define OUTW12 0b000000000000 //outw
 #define OUTW8 0b01000000 //outw
-#define OUTB12 0b000000000000 //outw
-#define OUTB8 0b00000000 //outw
+#define OUTB12 0b000000000000 //outb
+#define OUTB8 0b00000000 //outb
 
 //end of instruction
 #define END	-1
