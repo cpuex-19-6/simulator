@@ -437,7 +437,9 @@ void exec_TOI(INSTR instr, CPU *cpu, MEMORY *mem){
 
 	switch(instr.op){
 		case FTOI:{
-			float data = cpu->f[rs1];
+			float data;
+			fesetround(FE_TONEAREST);
+			data = nearbyint(cpu->f[rs1]);
 			cpu->x[rd] = (int32_t)data;
 			break;}
 		/*case FTOUI:{
