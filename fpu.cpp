@@ -493,7 +493,7 @@ void exec_FLA(INSTR instr, CPU *cpu, MEMORY *mem){
 		cpu->f[rd] = cpu->f[rs1] * cpu->f[rs2];	
 	}
 	else if(instr.op == FDIV){
-		cpu->f[rd] = cpu->f[rs1] / cpu->f[rs2];	
+		cpu->f[rd] = fdiv(cpu->f[rs1], cpu->f[rs2]);
 	}
 	else if(instr.op == FSQRT){
 		cpu->f[rd] = sqrtf(cpu->f[rs1]);
@@ -644,3 +644,101 @@ void mnemonic_FLA(INSTR instr, ASSEM *assem){
 	}
 }
 
+
+
+/* Reimplementation of FPU */
+
+FREG fdiv(FREG r1, FREG r2) {
+	uni rs1_uni, rs2_uni, rd_uni;
+
+	rs1_uni.f = r1;
+	rs2_uni.f = r2;
+
+	bitset<32> rs1(rs1_uni.i);
+	bitset<32> rs2(rs2_uni.i);
+
+	bool s1 = rs1[31];
+	bool s2 = rs2[31];
+
+	bitset<8> e1(downto(rs1.to_ulong(), 30, 23));
+	bitset<8> e2(downto(rs2.to_ulong(), 30, 23));
+
+	bitset<23> m1(downto(rs1.to_ulong(), 22, 0));
+	bitset<23> m2(downto(rs2.to_ulong(), 22, 0));
+
+	bool sy = (!s1 && s2) || (s1 && !s2);
+	bool flg = (e2.to_ulong() >= 0b01111111);
+
+	bitset<8> diff;
+	diff = flg ? (e2.to_ulong() - 0b01111111) : (0b01111111 - e2.to_ulong());
+
+	bitset<8> e;
+	e = (downto(m2.to_ulong(), 22, 11) == 0) ? (flg ? (0b01111111 - diff.to_ulong()) : (0b01111111 + diff.to_ulong())) : 
+                                    (flg ? (0b01111111 - diff.to_ulong() - 0b1) : (0b01111111 + diff.to_ulong() - 0b1));
+															
+	bool under_flg = (e.to_ulong() == 0);
+
+	bitset<24> init[4096];
+	uint64_t MODULE_BEGIN = 0b0000000000000;
+	uint64_t MODULE_END   = 0b1000000000000;
+	uint64_t DIVIDED = MODULE_END << 24;
+
+	for (uint64_t i = MODULE_BEGIN; i < MODULE_END; i = i+1) {
+		init[i] = (DIVIDED / (MODULE_END + i));
+	}
+
+	bitset<23> m;
+	m = downto(init[downto(m2.to_ulong(), 22, 11)].to_ulong(), 22, 0);
+	
+	bitset<32> inv0;
+	inv0 = under_flg ? ((s2 << 31) + (0b1 << 23) + m.to_ulong()) : ((s2 << 31) + (e.to_ulong() << 23) + m.to_ulong());
+
+	bitset<32> rs2_tmp;
+	rs2_tmp = under_flg ? ((rs2[31] << 31) + ((downto(rs2.to_ulong(), 30, 23)-0b1) << 23) + (downto(rs2.to_ulong(), 22, 0))) : rs2;
+	bitset<32> inv1_left;
+	inv1_left = (s2 << 31) + ((downto(inv0.to_ulong(), 30, 23)+0b1) << 23) + downto(inv0.to_ulong(), 22, 0);
+
+	bitset<32> inv1_right_tmp1;
+	uni rs2_tmp_uni, inv0_uni, inv1_right_tmp1_uni;
+	rs2_tmp_uni.i = rs2_tmp.to_ulong();
+	inv0_uni.i = inv0.to_ulong();
+
+	// fmul u1
+	inv1_right_tmp1_uni.f = rs2_tmp_uni.f * inv0_uni.f;
+	inv1_right_tmp1 = inv1_right_tmp1_uni.i;
+
+	bitset<32> inv1_right_tmp2;
+	uni inv1_right_tmp2_uni;
+
+	// fmul u2
+	inv1_right_tmp2_uni.f = inv1_right_tmp1_uni.f * inv0_uni.f;
+	inv1_right_tmp2 = inv1_right_tmp2_uni.i;
+
+	bitset<32> inv1_right;
+	inv1_right = (~inv1_right_tmp2[31] << 31) + downto(inv1_right_tmp2.to_ulong(), 30, 0);
+
+	bitset<32> inv1;
+	uni inv1_left_uni, inv1_right_uni, inv1_uni;
+	inv1_left_uni.i = inv1_left.to_ulong();
+	inv1_right_uni.i = inv1_right.to_ulong();
+
+	// fadd u3
+	inv1_uni.f = inv1_left_uni.f + inv1_right_uni.f;
+	inv1 = inv1_uni.i;
+
+	bitset<32> rdy;
+	uni rdy_uni;
+
+	// fmul u4
+	rdy_uni.f = rs1_uni.f + inv1_uni.f;
+	rdy = rdy_uni.i;
+
+	rd_uni.i = ((e1.to_ulong() == 0) && (m1.to_ulong() == 0)) ? (sy << 31) : // 割られる数が0の場合
+              under_flg ? 
+              ((downto(rdy.to_ulong(), 30, 23) == 0) ? (rdy[31] << 31 + downto(rdy.to_ulong(), 22, 1)) : 
+               (downto(rdy.to_ulong(), 30, 23) == 1) ? ((rdy[31] << 31) + (0b1 << 22) + downto(rdy.to_ulong(), 22, 1)) :
+               ((rdy[31] << 31) + ((downto(rdy.to_ulong(), 30, 23)-0b1) << 23) + downto(rdy.to_ulong(), 22, 0))) 
+              : rdy.to_ulong();
+
+	return rd_uni.f;
+}
