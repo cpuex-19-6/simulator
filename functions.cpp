@@ -131,5 +131,5 @@ void print_binary(uint32_t instr){
 //copy b to a with endian wrapping
 void endian_wrapper(void *a, void *b, size_t size){
 	for(int i = 0; i < size; i++)
-		memcpy(a + size -1 - i, b + i, 1);
+		memcpy((char*)a + size -1 - i, (char*)b + i, 1);
 }

@@ -1,19 +1,18 @@
 CC = gcc
 CFLAGS = -Wall -MMD -MP -O2
-LDFLAGS = -lm
 TARGET = sim
-SRCS = $(wildcard *.c)
-OBJS = $(SRCS:%.c=%.o)
-DEPS = $(SRCS:%.c=%.d)
+SRCS = $(wildcard *.cpp)
+OBJS = $(SRCS:%.cpp=%.o)
+DEPS = $(SRCS:%.cpp=%.d)
 
 all: $(TARGET)
 
 -include $(DEPS)
 
 $(TARGET): $(OBJS)
-	$(CC) -g -o $@ $^ $(LDFLAGS)
+	$(CC) -g -o $@ $^
 
-%.o: %.c
+%.o: %.cpp
 	$(CC) $(CFLAGS) -c $< 
 
 clean:

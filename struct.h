@@ -54,12 +54,12 @@ typedef enum ftype_t{
 	TXT,
 }FTYPE;
 
-typedef enum mode_t{
+enum MODE{
 	NONE,
 	RUN,
 	STEP,
 	QUIT,
-}MODE;
+};
 
 typedef enum mem_data_t {
 	Int, //int

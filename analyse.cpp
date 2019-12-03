@@ -14,14 +14,14 @@ void state_init(STATE *state){
 	//state->heap_bottom = 0;
 	//state->stack_top = DATA_MEM_SIZE;
 	state->stack_bottom = DATA_MEM_SIZE;
-	state->op = malloc(sizeof(long long int)*TOTAL_INSTR);
+	state->op = (unsigned long long*)malloc(sizeof(long long int)*TOTAL_INSTR);
 }
 
 void tag_set(TAG **tag, FILE *fp, char *s, unsigned int *n){
 	if(fscanf(fp, "%s%u", s, n) == 2){
 	
 	if(*tag == NULL)
-		*tag = malloc(sizeof(TAG));
+		*tag = (tag_t *)malloc(sizeof(TAG));
 
 	strcpy((*tag)->label, s);
 	(*tag)->pc = *n;
