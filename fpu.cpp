@@ -730,7 +730,7 @@ FREG fdiv(FREG r1, FREG r2) {
 	uni rdy_uni;
 
 	// fmul u4
-	rdy_uni.f = rs1_uni.f + inv1_uni.f;
+	rdy_uni.f = rs1_uni.f * inv1_uni.f;
 	rdy = rdy_uni.i;
 
 	rd_uni.i = ((e1.to_ulong() == 0) && (m1.to_ulong() == 0)) ? (sy << 31) : // 割られる数が0の場合
