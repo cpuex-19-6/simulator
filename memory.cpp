@@ -10,8 +10,8 @@
 #include "decode.h"
 
 void mem_init(MEMORY *mem){	
-	mem->instr = calloc(INSTR_MEM_SIZE, sizeof(INSTR));
-	mem->data = calloc(DATA_MEM_SIZE, sizeof(uint8_t));
+	mem->instr = (instr_t*)calloc(INSTR_MEM_SIZE, sizeof(INSTR));
+	mem->data = (uint8_t *)calloc(DATA_MEM_SIZE, sizeof(uint8_t));
 	memset(mem->instr, 0, sizeof(uint8_t)*INSTR_MEM_SIZE);
 	memset(mem->data, 0, sizeof(uint8_t)*DATA_MEM_SIZE);
 }
@@ -26,7 +26,7 @@ void mem_set(MEMORY *mem, OPTION option){
 
 		int n = 0;
 		uint32_t *tmp;
-		tmp = calloc(INSTR_MEM_SIZE/4, sizeof(uint32_t));
+		tmp = (uint32_t*)calloc(INSTR_MEM_SIZE/4, sizeof(uint32_t));
 
 		if(option.ftype_instr == BIN){
 			n = load_instr(tmp, option.fname_instr); //loaded instructions
@@ -73,7 +73,7 @@ int load_instr_txt(uint32_t *instr, char *filename){
 		exit(EXIT_FAILURE); }
 	
 	char *tmp;
-	tmp = malloc(INSTR_MEM_SIZE*9);
+	tmp = (char*)malloc(INSTR_MEM_SIZE*9);
 	int n = 0;
 	
 	if((n = fread(tmp, sizeof(char), INSTR_MEM_SIZE * 9, fp)) == 0){ //read and load txt data, テキストファイルを読むのでちょっと多めに読んでる。

@@ -18,7 +18,7 @@ void option_init(OPTION *option){
 	option->fname_data = NULL;
 	option->fname_output = NULL;
 	option->fname_tags = NULL;
-	option->mode = NONE;
+	option->mode = MODE::NONE;
 	option->reg = 0;
 	option->reg16 = 0;
 	option->freg = 0;
@@ -40,20 +40,20 @@ void option_set(int argn, char **arg, OPTION *option){
 				case 't': //txt file
 					option->ftype_instr = TXT;
 					i++;
-					option->fname_instr = malloc(strlen(arg[i]) + 1);
+					option->fname_instr = (char*)malloc(strlen(arg[i]) + 1);
 					strcpy(option->fname_instr, arg[i]);
 					break;
 				case 'd': //data-file
 					if(arg[i][2] == 'b'){ //binary data file
 						option->ftype_data = BIN;
 						i++;
-						option->fname_data = malloc(strlen(arg[i]) + 1);
+						option->fname_data = (char*)malloc(strlen(arg[i]) + 1);
 						strcpy(option->fname_data, arg[i]);
 					}
 					else if(arg[i][2] == 't'){ //txt data file
 						option->ftype_data = TXT;
 						i++;
-						option->fname_data = malloc(strlen(arg[i]) + 1);
+						option->fname_data = (char*)malloc(strlen(arg[i]) + 1);
 						strcpy(option->fname_data, arg[i]);
 					}
 					else {
@@ -65,13 +65,13 @@ void option_set(int argn, char **arg, OPTION *option){
 					if(arg[i][2] == 'b'){ //binary output file
 						option->ftype_output = BIN;
 						i++;
-						option->fname_output = malloc(strlen(arg[i]) + 1);
+						option->fname_output = (char*)malloc(strlen(arg[i]) + 1);
 						strcpy(option->fname_output, arg[i]);
 					}
 					else if(arg[i][2] == 't'){ //txt data file
 						option->ftype_output = TXT;
 						i++;
-						option->fname_output = malloc(strlen(arg[i]) + 1);
+						option->fname_output = (char*)malloc(strlen(arg[i]) + 1);
 						strcpy(option->fname_output, arg[i]);
 					}
 					else {
@@ -91,7 +91,7 @@ void option_set(int argn, char **arg, OPTION *option){
 					break;}
 				case 'l':
 					i++;
-					option->fname_tags = malloc(strlen(arg[i]) + 1);
+					option->fname_tags = (char*)malloc(strlen(arg[i]) + 1);
 					strcpy(option->fname_tags, arg[i]);
 					 break;
 				default:
@@ -101,7 +101,7 @@ void option_set(int argn, char **arg, OPTION *option){
 		}
 		else{ //instruction file is binary: default
 			option->ftype_instr = BIN;
-			option->fname_instr = malloc(strlen(arg[i]) + 1);
+			option->fname_instr = (char*)malloc(strlen(arg[i]) + 1);
 			strcpy(option->fname_instr, arg[i]);
 		}
 		i++; //increment arg
@@ -171,7 +171,7 @@ int command_parser(char *s, OPTION *option){
 				break;}
 			case 'b':{
 				if(option->breakpoint.bp == NULL)
-					option->breakpoint.bp = malloc(BP_NUM*sizeof(int));
+					option->breakpoint.bp = (int*)malloc(BP_NUM*sizeof(int));
 				int d;
 				fscanf(option->cmd_in, "%d", &d);
 				option->breakpoint.num++;
@@ -179,7 +179,7 @@ int command_parser(char *s, OPTION *option){
 				break;}
 			case 'm':{
 				if(option->mem_print.mp == NULL)
-					option->mem_print.mp = malloc(MP_NUM*sizeof(MEM_PRINT));
+					option->mem_print.mp = (mem_print_sub_t *)malloc(MP_NUM*sizeof(MEM_PRINT));
 				int d;
 				char c[2];
 				fscanf(option->cmd_in, "%s", c);
