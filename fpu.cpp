@@ -660,41 +660,41 @@ FREG fmul(FREG r1, FREG r2) {
 	bool s1 = rs1[31];
 	bool s2 = rs2[31];
 	
-	bitset<8> e1(downto(rs1.to_ulong(), 30, 23));
-	bitset<8> e2(downto(rs2.to_ulong(), 30, 23));
+	uint32_t e1 = downto(rs1.to_ulong(), 30, 23);
+	uint32_t e2 = downto(rs2.to_ulong(), 30, 23);
 
-	bitset<23> m1(downto(rs1.to_ulong(), 22, 0));
-	bitset<23> m2(downto(rs2.to_ulong(), 22, 0));
+	uint32_t m1 = downto(rs1.to_ulong(), 22, 0);
+	uint32_t m2 = downto(rs2.to_ulong(), 22, 0);
 
-	bitset<24> m1a;
-	bitset<24> m2a;
-	bitset<9> e1a;
-	bitset<9> e2a;
+	uint64_t m1a;
+	uint64_t m2a;
+	uint32_t e1a;
+	uint32_t e2a;
 
-	m1a = (e1 == 0) ? m1.to_ulong() : (0b1 << 23) + m1.to_ulong();
-	m2a = (e2 == 0) ? m2.to_ulong() : (0b1 << 23) + m2.to_ulong();
+	m1a = (e1 == 0) ? m1 : (0b1 << 23) + m1;
+	m2a = (e2 == 0) ? m2 : (0b1 << 23) + m2;
 
-	e1a = (e1 == 0) ? 0b1 : e1.to_ulong();
-	e2a = (e2 == 0) ? 0b1 : e2.to_ulong();
+	e1a = (e1 == 0) ? 0b1 : e1;
+	e2a = (e2 == 0) ? 0b1 : e2;
 
-	bitset<10> esum;
-	esum = e1a.to_ulong() + e2a.to_ulong();
+	uint32_t esum;
+	esum = e1a + e2a;
 
 	bool sy = (!s1 && s2) || (s1 && !s2);
 
-	bitset<8> eyd;
-	eyd = e1a.to_ulong() + e2a.to_ulong() + 0b10000010;
+	uint32_t eyd;
+	eyd = e1a + e2a + 0b10000010;
 
-	bitset<9> shifts;
-	shifts = (0b01111111 <= (e1a.to_ulong() + e2a.to_ulong())) ? 0b0 : (0b01111111 - (e1a.to_ulong() + e2a.to_ulong()));
+	uint32_t shifts;
+	shifts = (0b01111111 <= (e1a + e2a)) ? 0b0 : (0b01111111 - (e1a + e2a));
 
 	bitset<48> myd;
 	bitset<48> myd_shifts;
 
-	myd = m1a.to_ulong() * m2a.to_ulong();
-	myd_shifts = myd >> shifts.to_ulong();
+	myd = m1a * m2a;
+	myd_shifts = myd >> shifts;
 
-	bitset<6> se;
+	uint32_t se;
 	se = (myd[47] == 1) ? 0 :
               (myd[46] == 1) ? 1 :
               (myd[45] == 1) ? 2 :
@@ -745,28 +745,28 @@ FREG fmul(FREG r1, FREG r2) {
               (myd[0] == 1) ? 47 : 48;
 
 	int eyf;
-	bitset<8> eyr;
-	bitset<8> ey;
+	uint32_t eyr;
+	uint32_t ey;
 	bitset<48> myf;
 	bitset<23> myr;
 	bitset<23> my;
 
 
-	eyf = eyd.to_ulong() - se.to_ulong();
+	eyf = eyd - se;
 	eyr = (eyf > 0) ? downto(eyf, 7, 0) : 0b0;
 
-	myf = (eyf > 0) ? (myd << se.to_ulong()) : (myd << (downto(eyd.to_ulong(), 4, 0) - 1));
+	myf = (eyf > 0) ? (myd << se) : (myd << (downto(eyd, 4, 0) - 1));
 	myr = downto((myf >> 24).to_ulong(), 22, 0);
 
-	bool udf = (0b010000000 > (e1a.to_ulong() + e2a.to_ulong()));
-	bool udf_just = (0b01111111 == (e1a.to_ulong() + e2a.to_ulong()));
+	bool udf = (0b010000000 > (e1a + e2a));
+	bool udf_just = (0b01111111 == (e1a + e2a));
 
 	ey = (udf_just == 0b1 && myd[47] == 0b1) ? 0b00000001 :
               (udf == 0b1) ? 0b00000000 : eyr;
 	my = (udf == 0b1) ? downto((myd_shifts >> 24).to_ulong(), 22, 0) : myr;
 
 	rd_uni.i = (((e1 == 0b0) && (m1 == 0b0)) || ((e2 == 0b0) && (m2 == 0b0))) ? (sy << 31) :   // 0をかける場合
-              ((sy << 31) + (ey.to_ulong() << 23) + my.to_ulong());
+              ((sy << 31) + (ey << 23) + my.to_ulong());
 
 	return rd_uni.f;
 }
@@ -784,25 +784,25 @@ FREG fdiv(FREG r1, FREG r2) {
 	bool s1 = rs1[31];
 	bool s2 = rs2[31];
 
-	bitset<8> e1(downto(rs1.to_ulong(), 30, 23));
-	bitset<8> e2(downto(rs2.to_ulong(), 30, 23));
+	uint32_t e1 = downto(rs1.to_ulong(), 30, 23);
+	uint32_t e2 = downto(rs2.to_ulong(), 30, 23);
 
-	bitset<23> m1(downto(rs1.to_ulong(), 22, 0));
-	bitset<23> m2(downto(rs2.to_ulong(), 22, 0));
+	uint32_t m1 = downto(rs1.to_ulong(), 22, 0);
+	uint32_t m2 = downto(rs2.to_ulong(), 22, 0);
 
 	bool sy = (!s1 && s2) || (s1 && !s2);
-	bool flg = (e2.to_ulong() >= 0b01111111);
+	bool flg = (e2 >= 0b01111111);
 
-	bitset<8> diff;
-	diff = flg ? (e2.to_ulong() - 0b01111111) : (0b01111111 - e2.to_ulong());
+	uint32_t diff;
+	diff = flg ? (e2 - 0b01111111) : (0b01111111 - e2);
 
-	bitset<8> e;
-	e = (downto(m2.to_ulong(), 22, 11) == 0) ? (flg ? (0b01111111 - diff.to_ulong()) : (0b01111111 + diff.to_ulong())) : 
-                                    (flg ? (0b01111111 - diff.to_ulong() - 0b1) : (0b01111111 + diff.to_ulong() - 0b1));
+	uint32_t e;
+	e = (downto(m2, 22, 11) == 0) ? (flg ? (0b01111111 - diff) : (0b01111111 + diff)) : 
+                                    (flg ? (0b01111111 - diff - 0b1) : (0b01111111 + diff - 0b1));
 															
-	bool under_flg = (e.to_ulong() == 0);
+	bool under_flg = (e == 0);
 
-	bitset<24> init[4096];
+	uint32_t init[4096];
 	uint64_t MODULE_BEGIN = 0b0000000000000;
 	uint64_t MODULE_END   = 0b1000000000000;
 	uint64_t DIVIDED = MODULE_END << 24;
@@ -811,25 +811,23 @@ FREG fdiv(FREG r1, FREG r2) {
 		init[i] = (DIVIDED / (MODULE_END + i));
 	}
 
-	bitset<23> m;
-	m = downto(init[downto(m2.to_ulong(), 22, 11)].to_ulong(), 22, 0);
+	uint32_t m;
+	m = downto(init[downto(m2, 22, 11)], 22, 0);
 	
-	bitset<32> inv0;
-	inv0 = under_flg ? ((s2 << 31) + (0b1 << 23) + m.to_ulong()) : ((s2 << 31) + (e.to_ulong() << 23) + m.to_ulong());
+	uint32_t inv0;
+	inv0 = under_flg ? ((s2 << 31) + (0b1 << 23) + m) : ((s2 << 31) + (e << 23) + m);
 
-	bitset<32> rs2_tmp;
-	rs2_tmp = under_flg ? ((rs2[31] << 31) + ((downto(rs2.to_ulong(), 30, 23)-0b1) << 23) + (downto(rs2.to_ulong(), 22, 0))) : rs2;
-	bitset<32> inv1_left;
-	inv1_left = (s2 << 31) + ((downto(inv0.to_ulong(), 30, 23)+0b1) << 23) + downto(inv0.to_ulong(), 22, 0);
+	uint32_t rs2_tmp;
+	rs2_tmp = under_flg ? ((rs2[31] << 31) + ((downto(rs2.to_ulong(), 30, 23)-0b1) << 23) + (downto(rs2.to_ulong(), 22, 0))) : rs2.to_ulong();
+	uint32_t inv1_left;
+	inv1_left = (s2 << 31) + ((downto(inv0, 30, 23)+0b1) << 23) + downto(inv0, 22, 0);
 
-	bitset<32> inv1_right_tmp1;
 	uni rs2_tmp_uni, inv0_uni, inv1_right_tmp1_uni;
-	rs2_tmp_uni.i = rs2_tmp.to_ulong();
-	inv0_uni.i = inv0.to_ulong();
+	rs2_tmp_uni.i = rs2_tmp;
+	inv0_uni.i = inv0;
 
 	// fmul u1
 	inv1_right_tmp1_uni.f = fmul(rs2_tmp_uni.f, inv0_uni.f);
-	inv1_right_tmp1 = inv1_right_tmp1_uni.i;
 
 	bitset<32> inv1_right_tmp2;
 	uni inv1_right_tmp2_uni;
@@ -838,17 +836,15 @@ FREG fdiv(FREG r1, FREG r2) {
 	inv1_right_tmp2_uni.f = fmul(inv1_right_tmp1_uni.f, inv0_uni.f);
 	inv1_right_tmp2 = inv1_right_tmp2_uni.i;
 
-	bitset<32> inv1_right;
+	uint32_t inv1_right;
 	inv1_right = (~inv1_right_tmp2[31] << 31) + downto(inv1_right_tmp2.to_ulong(), 30, 0);
 
-	bitset<32> inv1;
 	uni inv1_left_uni, inv1_right_uni, inv1_uni;
-	inv1_left_uni.i = inv1_left.to_ulong();
-	inv1_right_uni.i = inv1_right.to_ulong();
+	inv1_left_uni.i = inv1_left;
+	inv1_right_uni.i = inv1_right;
 
 	// fadd u3
 	inv1_uni.f = inv1_left_uni.f + inv1_right_uni.f;
-	inv1 = inv1_uni.i;
 
 	bitset<32> rdy;
 	uni rdy_uni;
@@ -857,7 +853,7 @@ FREG fdiv(FREG r1, FREG r2) {
 	rdy_uni.f = fmul(rs1_uni.f, inv1_uni.f);
 	rdy = rdy_uni.i;
 
-	rd_uni.i = ((e1.to_ulong() == 0) && (m1.to_ulong() == 0)) ? (sy << 31) : // 割られる数が0の場合
+	rd_uni.i = ((e1 == 0) && (m1 == 0)) ? (sy << 31) : // 割られる数が0の場合
               under_flg ? 
               ((downto(rdy.to_ulong(), 30, 23) == 0) ? (rdy[31] << 31 + downto(rdy.to_ulong(), 22, 1)) : 
                (downto(rdy.to_ulong(), 30, 23) == 1) ? ((rdy[31] << 31) + (0b1 << 22) + downto(rdy.to_ulong(), 22, 1)) :
@@ -872,97 +868,91 @@ FREG fsqr(FREG r1) {
 	uni rs1_uni, rd_uni;
 	rs1_uni.f = r1;
 
-	bitset<32> rs1(rs1_uni.i);
+	uint32_t rs1 = rs1_uni.i;
 
-	bitset<8> e1(downto(rs1.to_ulong(), 30, 23));
-	bitset<23> m1(downto(rs1.to_ulong(), 22, 0));
-	bitset<22> m1s;
+	uint32_t e1 = downto(rs1, 30, 23);
+	bitset<23> m1(downto(rs1, 22, 0));
+	uint32_t m1s;
 	m1s = m1.to_ulong() >> 1;
 
-	bool flg = (e1.to_ulong() >= 0b01111111);
+	bool flg = (e1 >= 0b01111111);
 
 	bitset<8> diff;
-	diff = flg ? (e1.to_ulong() - 0b01111111) : (0b01111111 - e1.to_ulong());
+	diff = flg ? (e1 - 0b01111111) : (0b01111111 - e1);
 
 	bool even = (diff[0] == 0b0);
 
-	bitset<8> e;
+	uint32_t e;
 	e = (even && m1[22] == 0b0) ? (flg ? (0b01111111 + (diff.to_ulong() >> 1)) : (0b01111111 - (diff.to_ulong() >> 1))) : 
              (even  && m1[22] == 0b1) ? (flg ? (0b01111111 + (diff.to_ulong() >> 1)) : (0b01111111 - (diff.to_ulong() >> 1))) :
              (!even && m1[22] == 0b0) ? (flg ? (0b01111111 + ((diff.to_ulong() + 0b1) >> 1) - 0b1) : (0b01111111 - ((diff.to_ulong() + 0b1) >> 1))) :
                                         (flg ? (0b01111111 + ((diff.to_ulong() + 0b1) >> 1)) : (0b01111111 - ((diff.to_ulong() - 0b1) >> 1)));
 
-	bitset<23> m;
+	uint32_t m;
 	m = (even && m1[22] == 0b0) ? (flg ? (0b01 << 21) : (0b01 << 21)) :
              (even  && m1[22] == 0b1) ? (flg ? (0b10 << 21) : (0b10 << 21))  :
              (!even && m1[22] == 0b0) ? (flg ? (0b11 << 21) : (0b11 << 21)) :
                                          (flg ? (0b00 << 21) : (0b00 << 21));
 
-	bitset<32> rd1;
-	rd1 = (e.to_ulong() << 23) + m.to_ulong();
+	uint32_t rd1;
+	rd1 = (e << 23) + m;
 
-	bitset<32> a;
-	a = (e1.to_ulong() > 0b1) ? (((e1.to_ulong() - 0b1) << 23) + m1.to_ulong()) :
-             (e1.to_ulong() == 0b1) ? ((0b1 << 22) + m1s.to_ulong()) :
-             m1s.to_ulong();
+	uint32_t a;
+	a = (e1 > 0b1) ? (((e1 - 0b1) << 23) + m1.to_ulong()) :
+             (e1 == 0b1) ? ((0b1 << 22) + m1s) :
+             m1s;
 
-	bitset<32> rd2l;
-	rd2l = ((downto(rd1.to_ulong(), 30, 23) - 0b1) << 23) + downto(rd1.to_ulong(), 22, 0);
+	uint32_t rd2l;
+	rd2l = ((downto(rd1, 30, 23) - 0b1) << 23) + downto(rd1, 22, 0);
 
-	bitset<32> rd2r;
 	uni a_uni, rd1_uni, rd2r_uni;
-	a_uni.i = a.to_ulong();
-	rd1_uni.i = rd1.to_ulong();
+	a_uni.i = a;
+	rd1_uni.i = rd1;
 
 	// fdiv u1
 	rd2r_uni.f = fdiv(a_uni.f, rd1_uni.f);
-	rd2r = rd2r_uni.i;
 
-	bitset<32> rd2;
+	uint32_t rd2;
 	uni rd2l_uni, rd2_uni;
-	rd2l_uni.i = rd2l.to_ulong();
+	rd2l_uni.i = rd2l;
 
 	// fadd u2
 	rd2_uni.f = rd2l_uni.f + rd2r_uni.f;
 	rd2 = rd2_uni.i;
 
-	bitset<32> rd3l;
-	rd3l = ((downto(rd2.to_ulong(), 30, 23) - 0b1) << 23) + downto(rd2.to_ulong(), 22, 0);
+	uint32_t rd3l;
+	rd3l = ((downto(rd2, 30, 23) - 0b1) << 23) + downto(rd2, 22, 0);
 
-	bitset<32> rd3r;
 	uni rd3r_uni;
 
 	// fdiv u3
 	rd3r_uni.f = fdiv(a_uni.f, rd2_uni.f);
-	rd3r = rd3r_uni.i;
 
-	bitset<32> rd3;
+	uint32_t rd3;
 	uni rd3l_uni, rd3_uni;
-	rd3l_uni.i = rd3l.to_ulong();
+	rd3l_uni.i = rd3l;
 
 	// fadd u4
 	rd3_uni.f = rd3l_uni.f + rd3r_uni.f;
 	rd3 = rd3_uni.i;
 
-	bitset<32> rd4r;
 	uni rd4r_uni;
 
 	// fdiv u5
 	rd4r_uni.f = fdiv(a_uni.f, rd3_uni.f);
-	rd4r = rd4r_uni.i;
 
-	bitset<32> rd4l;
-	rd4l = ((downto(rd3.to_ulong(), 30, 23) - 0b1) << 23) + downto(rd3.to_ulong(), 22, 0);
+	uint32_t rd4l;
+	rd4l = ((downto(rd3, 30, 23) - 0b1) << 23) + downto(rd3, 22, 0);
 
-	bitset<32> rd4;
+	uint32_t rd4;
 	uni rd4l_uni, rd4_uni;
-	rd4l_uni.i = rd4l.to_ulong();
+	rd4l_uni.i = rd4l;
 
 	// fadd u6
 	rd4_uni.f = rd4l_uni.f + rd4r_uni.f;
 	rd4 = rd4_uni.i;
 
-	rd_uni.i = (rs1.to_ulong() == 0b0) ? 0b0 : rd4.to_ulong();
+	rd_uni.i = (rs1 == 0b0) ? 0b0 : rd4;
 	return rd_uni.f;
 
 }
