@@ -1,5 +1,5 @@
-CC = gcc
-CFLAGS = -Wall -MMD -MP -O2
+CC = g++
+CFLAGS = -Wall -std=c++14
 TARGET = sim
 SRCS = $(wildcard *.cpp)
 OBJS = $(SRCS:%.cpp=%.o)

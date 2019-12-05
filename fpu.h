@@ -21,6 +21,8 @@ void decode_FLA(uint32_t instr, INSTR *imp);
 
 void mnemonic_FLA(INSTR instr, ASSEM *assem);
 
-FREG fdiv(FREG rs1, FREG rs2);
+FREG fmul(FREG, FREG);
+FREG fdiv(FREG, FREG);
+FREG fsqr(FREG);
 
 #endif
