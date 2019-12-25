@@ -223,6 +223,18 @@ void print_op(int op){
 		case FLE:
 			printf("fle");
 			break;
+		case FBEQ:
+			printf("fbeq");
+			break;
+		case FBNE:
+			printf("fbne");
+			break;
+		case FBLT:
+			printf("fblt");
+			break;
+		case FBGE:
+			printf("fbge");
+			break;
 		case INW:
 			printf("inw");
 			break;
