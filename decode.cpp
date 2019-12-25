@@ -387,6 +387,9 @@ void decode_instr(uint32_t instr, INSTR *imp){
 			break;
 		case OP_OUT:
 			decode_OUT(instr, imp);
+            break;
+        case OP_FCB:
+            decode_FCB(instr, imp);
 			break;
 		default: 
 			putchar('\n');

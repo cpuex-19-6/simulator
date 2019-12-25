@@ -259,6 +259,11 @@ void disassem_instr(INSTR instr, ASSEM *assem){
 		assem->itype = R_sub_sub_sub;
 		mnemonic_OUT(instr, assem);
 	}
+	else if(FCB_first <= instr.op && instr.op <= FCB_last){
+		assem->itype = B;
+		mnemonic_FCB(instr, assem);
+		strcpy(assem->reg, "ff");
+	}
 	else{
 		perror("exec_instr: invalid instruction");
 		exit(EXIT_FAILURE);

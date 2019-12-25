@@ -114,6 +114,13 @@
 #define F3_FLT 0b001 //flt
 #define F3_FLE 0b000 //fle
 
+//flaoting point coditional branch
+#define OP_FCB 0b1111011 //floating point conditional branch
+#define F3_FBEQ 0b000 //fbeq
+#define F3_FBNE 0b001 //fbne
+#define F3_FBLT 0b100 //fblt
+#define F3_FBGE 0b101 //fbge
+
 #define OP_IN 0b0001011 //input
 #define INW20 0b00000000000000000010 //inw
 #define INF20 0b01000000000000000010 //inw
@@ -228,6 +235,14 @@
 #define OUTB	55
 #define OUTW	56
 
-#define TOTAL_INSTR 57
+//FCB
+#define FCB_first 57
+#define FBEQ 57
+#define FBNE 58
+#define FBLT 59
+#define FBGE 60
+#define FCB_last 60
+
+#define TOTAL_INSTR 61
 
 #endif

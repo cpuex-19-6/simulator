@@ -310,6 +310,39 @@ void decode_FLA(uint32_t instr, INSTR *imp){
 	}
 }
 
+//floating point conditional branch
+void decode_FCB(uint32_t instr, INSTR *imp){
+	uint32_t f3 = downto(instr, 14, 12);
+
+	int32_t rs1 = (int32_t)downto(instr, 19, 15);
+	int32_t rs2 = (int32_t)downto(instr, 24, 20);
+
+    int32_t imm = immediate(instr, B);
+	imm = imm & ((~0) << 2); //immediate wrapping
+
+	imp->rd_or_imm = imm;
+	imp->rs1 = rs1;
+	imp->rs2_or_imm = rs2;
+
+	switch(f3){
+		case F3_FBEQ:
+			imp->op = FBEQ;
+			break;
+        case F3_FBNE:
+            imp->op = FBNE;
+            break;
+		case F3_FBLT:
+			imp->op = FBLT;
+			break;
+		case F3_FBGE:
+			imp->op = FBGE;
+			break;
+		default:
+			perror("inavlid f3: F3_FCB");
+			exit(EXIT_FAILURE);
+	}
+}
+
 //floating point load
 void exec_FLW(INSTR instr, CPU *cpu, MEMORY *mem){
 	int32_t rd = instr.rd_or_imm;
@@ -529,6 +562,43 @@ void exec_FLA(INSTR instr, CPU *cpu, MEMORY *mem){
 	}
 }
 
+//floating point conditional branch
+void exec_FCB(INSTR instr, CPU *cpu, MEMORY *mem){
+	int32_t rs1 = instr.rs1;
+	int32_t rs2 = instr.rs2_or_imm;
+	int32_t imm = instr.rd_or_imm;
+
+	switch(instr.op){
+		case FBEQ:
+			if(cpu->f[rs1] == cpu->f[rs2]){
+				cpu->pc += imm;//pc = pc+imm
+			}
+			else cpu->pc += 4;// pc = pc+4;
+			break;
+		case FBNE:
+			if(cpu->f[rs1] != cpu->f[rs2]){
+				cpu->pc += imm;//pc = pc+imm
+			}
+			else cpu->pc += 4;// pc = pc+4;
+			break;
+		case FBLT:
+			if(cpu->f[rs1] < cpu->f[rs2]){
+				cpu->pc += imm;//pc = pc+imm
+			}
+			else cpu->pc += 4;// pc = pc+4;
+			break;
+		case FBGE:
+			if(cpu->f[rs1] >= cpu->f[rs2]){
+				cpu->pc += imm;//pc = pc+imm
+			}
+			else cpu->pc += 4;// pc = pc+4;
+			break;
+		default:
+        perror("exec_FCB: invalid instruction");
+			exit(EXIT_FAILURE);
+	}
+}
+
 //floating point arithmetic logic and others mnemonic
 void mnemonic_FLA(INSTR instr, ASSEM *assem){
 	
@@ -644,6 +714,26 @@ void mnemonic_FLA(INSTR instr, ASSEM *assem){
 	}
 }
 
+void mnemonic_FCB(INSTR instr, ASSEM *assem){
+
+	switch(instr.op){
+		case FBEQ:
+			strcpy(assem->mnemonic, "fbeq");
+			break;
+		case FBNE:
+			strcpy(assem->mnemonic, "fbne");
+			break;
+		case FBLT:
+			strcpy(assem->mnemonic, "fblt");
+			break;
+		case FBGE:
+			strcpy(assem->mnemonic, "fbge");
+			break;
+		default:
+			perror("invalid f3: OP_FCB");
+			exit(EXIT_FAILURE);
+	}
+}
 
 
 /* Reimplementation of FPU */

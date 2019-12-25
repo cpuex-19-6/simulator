@@ -319,6 +319,9 @@ void exec_instr(INSTR instr, CPU *cpu, MEMORY *mem, IO *io, STATE *state){
 		exec_OUT(instr, cpu, mem, io);
 		cpu->pc += 4;// pc = pc+4;
 	}
+	else if(FCB_first <= instr.op && instr.op <= FCB_last){
+		exec_FCB(instr, cpu, mem);
+	}
 	else{
 		perror("exec_instr: invalid instruction");
 		exit(EXIT_FAILURE);
