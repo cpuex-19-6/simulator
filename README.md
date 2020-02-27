@@ -28,7 +28,7 @@ RV32IF + alpha
   
 ## file option
 
-`-t txt-instruction-file`
+`-t txt-instruction-file` （命令ファイルはデフォルト(オプション無し）ではバイナリ）
 
 `-db binary-data-file`
 

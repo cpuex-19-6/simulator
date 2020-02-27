@@ -68,7 +68,7 @@ void option_set(int argn, char **arg, OPTION *option){
 						option->fname_output = (char*)malloc(strlen(arg[i]) + 1);
 						strcpy(option->fname_output, arg[i]);
 					}
-					else if(arg[i][2] == 't'){ //txt data file
+					else if(arg[i][2] == 't'){ //txt output file
 						option->ftype_output = TXT;
 						i++;
 						option->fname_output = (char*)malloc(strlen(arg[i]) + 1);
